@@ -1,6 +1,12 @@
 import type { DocumentNode } from 'graphql'
 
-import { useQuery, OperationResult } from './GraphQLHooksProvider'
+import {
+  BaseQueryOptions,
+  OperationResult,
+  OperationVariables,
+} from 'src/graphql'
+
+import { useQuery } from './GraphQLHooksProvider'
 
 const Query: React.FunctionComponent<{
   query: DocumentNode
@@ -25,9 +31,8 @@ export type CellSuccessStateComponent =
   | DataObject
 
 export interface WithCellProps {
-  beforeQuery?: <TProps>(props: TProps) => { variables: TProps }
-  // @ts-expect-error We do not know, and even really care, what they are here.
-  QUERY: DocumentNode | (({ variables: unknown }) => DocumentNode)
+  beforeQuery?: (props: OperationVariables) => BaseQueryOptions
+  QUERY: DocumentNode | ((before: BaseQueryOptions) => DocumentNode)
   afterQuery?: (data: DataObject) => DataObject
   Loading?: React.FC<CellLoadingEmptyStateComponent>
   Failure?: React.FC<CellFailureStateComponent>
