@@ -1,9 +1,9 @@
 import * as tsm from 'ts-morph'
 import { DiagnosticSeverity } from 'vscode-languageserver-types'
 
-import { BaseNode } from '../ide'
+import { BaseNode, Reference } from '../ide'
 import { iter } from '../x/Array'
-import { lazy } from '../x/decorators'
+import { lazy, memo } from '../x/decorators'
 import {
   ExtendedDiagnostic,
   Location_fromNode,
@@ -11,8 +11,9 @@ import {
 
 import { RWSDLField } from './RWSDLField'
 import { RWService } from './RWService'
+import { OutlineInfoProvider } from './types'
 
-export class RWServiceFunction extends BaseNode {
+export class RWServiceFunction extends BaseNode implements OutlineInfoProvider {
   constructor(
     public name: string,
     public node: tsm.FunctionDeclaration | tsm.ArrowFunction,
@@ -26,11 +27,25 @@ export class RWServiceFunction extends BaseNode {
     return this.parent.id + ' ' + this.name
   }
 
+  bailOutOnCollection(uri: string): boolean {
+    if (this.parent.uri === uri) return false
+    return true
+  }
+
+  @lazy() get functionNameNode() {
+    // this is straightforward if this is a function declaration
+    if (tsm.Node.isFunctionDeclaration(this.node))
+      return this.node.getNameNode()
+    // but if this is an arrow function, then we need to jump out to get the variable name
+    return this.node
+      .getFirstAncestorByKind(tsm.SyntaxKind.VariableDeclaration)
+      ?.getNameNode()
+  }
+
   /**
    * The SDL field that this function implements, if any
    * TODO: describe this in prose.
    */
-
   @lazy() get sdlField(): RWSDLField | undefined {
     return this.parent.sdl?.implementableFields?.find(
       (f) => f.name === this.name
@@ -87,4 +102,41 @@ export class RWServiceFunction extends BaseNode {
       // we then simpy "bubble up" the type errors from the typescript compiler
     }
   }
+
+  *ideInfo() {
+    if (this.sdlField?.location) {
+      if (this.functionNameNode) {
+        const location = Location_fromNode(this.functionNameNode)
+        const target = this.sdlField.name_location
+        yield {
+          kind: 'Reference',
+          location,
+          target,
+        } as Reference
+      }
+    }
+  }
+
+  @lazy() get location() {
+    return Location_fromNode(this.node)
+  }
+
+  @lazy() get outlineLabel() {
+    return this.name
+  }
+
+  @lazy() get outlineLocation() {
+    if (this.functionNameNode) return Location_fromNode(this.functionNameNode)
+  }
+
+  @memo() outlineChildren() {
+    return [
+      {
+        outlineLabel: 'implements GraphQL/SDL field',
+        outlineChildren: () => [this.sdlField],
+      },
+    ]
+  }
+
+  outlineIcon = 'symbol-method'
 }

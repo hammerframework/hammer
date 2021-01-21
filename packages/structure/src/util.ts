@@ -11,6 +11,7 @@ export function validateRoutePath(path: string) {
 
   // Check for duplicate named params.
   const matches = path.matchAll(/\{([^}]+)\}/g)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const memo: any = {}
   for (const match of matches) {
     // Extract the param's name to make sure there aren't any duplicates

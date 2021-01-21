@@ -1,15 +1,13 @@
-import { basename } from 'path'
-
 import * as tsm from 'ts-morph'
 import { Location, Range } from 'vscode-languageserver-types'
 
 import { RWError } from '../errors'
 import { BaseNode, Decoration, Definition, DocumentLinkX, HoverX } from '../ide'
 import { validateRoutePath } from '../util'
-import { lazy } from '../x/decorators'
+import { lazy, memo } from '../x/decorators'
+import { Command_cli, Command_open } from '../x/vscode'
 import {
   err,
-  LocationLike_toHashLink,
   LocationLike_toLocation,
   Location_fromFilePath,
   Location_fromNode,
@@ -18,9 +16,10 @@ import {
 } from '../x/vscode-languageserver-types'
 
 import { RWRouter } from './RWRouter'
+import { OutlineInfoProvider } from './types'
 import { advanced_path_parser } from './util/advanced_path_parser'
 
-export class RWRoute extends BaseNode {
+export class RWRoute extends BaseNode implements OutlineInfoProvider {
   constructor(
     /**
      * the <Route> tag
@@ -67,14 +66,29 @@ export class RWRoute extends BaseNode {
   }
 
   @lazy() get outlineDescription(): string | undefined {
-    const fp = this.page?.filePath
-    if (!fp) return undefined
-    return basename(fp)
+    return this.page?.basenameNoExt
   }
 
-  @lazy() get outlineLink(): string {
-    return LocationLike_toHashLink(this.location)
-    //return LocationLike_toTerminalLink(this.location)
+  @lazy() get outlineIcon() {
+    return this.isPrivate ? 'gist-secret' : 'gist'
+  }
+
+  @lazy() get outlineMenu() {
+    return {
+      kind: 'route',
+      openComponent: this.page ? Command_open(this.page.uri) : undefined,
+      openRoute: Command_open(this.location),
+      openInBrowser: Command_cli(`rw dev --open='${this.path}'`),
+    }
+  }
+
+  @memo() outlineChildren() {
+    // return [
+    //   this.page
+    //     ? { outlineExtends: this.page, outlineDescription: '' }
+    //     : undefined,
+    // ]
+    return [this.page]
   }
 
   /**

@@ -1,3 +1,4 @@
+import { Location as GraphQLLocation } from 'graphql'
 import {
   FieldDefinitionNode,
   ObjectTypeDefinitionNode,
@@ -11,13 +12,12 @@ import {
 } from 'vscode-languageserver-types'
 
 import { RWError } from '../errors'
-import { BaseNode, Implementation } from '../ide'
+import { BaseNode, Implementation, Reference } from '../ide'
 import { lazy } from '../x/decorators'
 import { URL_file } from '../x/URL'
 import {
   ExtendedDiagnostic,
   Location_fromNode,
-  Position_fromTSMorphOffset,
 } from '../x/vscode-languageserver-types'
 
 import { RWSDL } from './RWSDL'
@@ -36,19 +36,32 @@ export class RWSDLField extends BaseNode {
       this.parent.id + ' ' + this.objectTypeDef.name.value + '.' + this.name
     )
   }
+  bailOutOnCollection(uri: string): boolean {
+    if (this.parent.uri === uri) return false
+    return true
+  }
   /**
    * The location of this field.
    * Calculating this is slightly complicated since it is embedded within a TaggedTemplateLiteral
    */
   @lazy() get location(): Location {
-    let { start, end } = this.field.loc!
-    const node = this.parent.schemaStringNode!
-    start += node.getPos() + 1 // we add one to account for the quote (`)
-    end += node.getPos() + 1
-    const startPos = Position_fromTSMorphOffset(start, node.getSourceFile())
-    const endPos = Position_fromTSMorphOffset(end, node.getSourceFile())
-    return { uri: this.parent.uri, range: { start: startPos, end: endPos } }
+    return this._loc_map_orFail(this.field.loc)
   }
+
+  /**
+   * only the location of the "name" part of this field declaration
+   */
+  @lazy() get name_location(): Location {
+    return this._loc_map_orFail(this.field.name.loc)
+  }
+  private _loc_map_orFail(loc?: GraphQLLocation) {
+    if (loc) {
+      const loc2 = this.parent.schemaTag?.loc__gql_to_lsp(loc)
+      if (loc2) return loc2
+    }
+    throw new Error('cannot map graphql location to LSP location') // this should not happen
+  }
+
   @lazy() get name() {
     return this.field.name.value
   }
@@ -57,11 +70,41 @@ export class RWSDLField extends BaseNode {
   }
   *ideInfo() {
     if (this.impl) {
+      const location = this.location
+      const target = Location_fromNode(
+        this.impl.functionNameNode ?? this.impl.node
+      )
       yield {
         kind: 'Implementation',
-        location: this.location,
-        target: Location_fromNode(this.impl.node),
+        location,
+        target,
       } as Implementation
+      yield {
+        kind: 'Reference',
+        location,
+        target,
+      } as Reference
+      // TODO: see https://github.com/microsoft/vscode-languageserver-node/issues/555
+      // yield {
+      //   kind: 'CodeLens',
+      //   location,
+      //   codeLens: {
+      //     range: location.range,
+      //     command: Command_open(target, 'Open Implementation (Service)'),
+      //   },
+      // } as CodeLensX
+      // yield {
+      //   kind: 'CodeLens',
+      //   location,
+      //   codeLens: {
+      //     range: location.range,
+      //     command: {
+      //       command: 'editor.action.showReferences',
+      //       title: 'show references',
+      //     },
+      //   },
+      // } as CodeLensX
+      // editor.action.showReference
     }
   }
   /**
@@ -69,7 +112,7 @@ export class RWSDLField extends BaseNode {
    * this is an important rule
    */
   @lazy() get impl(): RWServiceFunction | undefined {
-    return (this.parent.service?.funcs ?? []).find((f) => f.name === this.name)
+    return this.parent.service?.funcs?.find((f) => f.name === this.name)
   }
   // TODO: improve snippet
   @lazy() private get defaultImplSnippet(): string {
@@ -121,4 +164,10 @@ export const ${this.field.name.value} = ({${params}}) => {
       } as ExtendedDiagnostic
     }
   }
+
+  @lazy() get outlineLabel() {
+    return this.name
+  }
+
+  outlineIcon = 'symbol-method'
 }

@@ -1,21 +1,31 @@
-import { basename } from 'path'
+import { basename, dirname, extname, join } from 'path'
 
+import { readdirSync } from 'fs-extra'
 import * as tsm from 'ts-morph'
 import { TextDocuments } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import {
   CodeLens,
   DocumentLink,
+  DocumentUri,
   Hover,
   Location,
   Range,
 } from 'vscode-languageserver-types'
 
-import { Host, DefaultHost } from './hosts'
-import { ArrayLike, ArrayLike_normalize } from './x/Array'
+import { DefaultHost, Host } from './hosts'
+import { OutlineInfoProvider } from './model/types'
+import {
+  ArrayLike,
+  ArrayLike_normalize,
+  Array_collectInstancesOf,
+  iter,
+} from './x/Array'
 import { lazy, memo } from './x/decorators'
-import { basenameNoExt } from './x/path'
+import { basenameNoExt, followsDirNameConvention } from './x/path'
 import { createTSMSourceFile_cached } from './x/ts-morph'
+import { tsm_Project_redwoodFriendly } from './x/ts-morph2/tsm_Project_redwoodFriendly'
+import { ts_findTSOrJSConfig } from './x/ts/ts_findTSConfig'
 import { URL_file } from './x/URL'
 import { ExtendedDiagnostic } from './x/vscode-languageserver-types'
 
@@ -76,7 +86,7 @@ export interface DocumentLinkX {
   link: DocumentLink
 }
 
-export abstract class BaseNode {
+export abstract class BaseNode implements OutlineInfoProvider {
   /**
    * Each node MUST have a unique ID.
    * IDs have meaningful information.
@@ -93,7 +103,7 @@ export abstract class BaseNode {
   get host(): Host {
     if (this.parent) return this.parent.host
     throw new Error(
-      "Could not find host implementation on root node (you must override the 'host' gettter)"
+      "Could not find host implementation on root node (you must override the 'host' getter)"
     )
   }
   exists = true
@@ -101,11 +111,13 @@ export abstract class BaseNode {
    * Returns the children of this node.
    * Override this.
    */
-  children(): ArrayLike<BaseNode> {
+  children(): ArrayLike<BaseNode | undefined | null> {
     return []
   }
-  @memo() private _children() {
-    return ArrayLike_normalize(this.children())
+  @memo() private async _children() {
+    return (await ArrayLike_normalize(this.children()))
+      .filter((x) => !!x)
+      .map((x) => x as BaseNode)
   }
 
   /**
@@ -181,15 +193,20 @@ export abstract class BaseNode {
   }
 
   bailOutOnCollection(uri: string): boolean {
+    if (typeof uri !== 'string') return true
     if (this.id === uri) return false
     if (uri.startsWith(this.id)) return false
     return true
   }
 
   @lazy() get closestContainingUri(): string | undefined {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { uri } = this as any
-    if (uri) return uri
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { uri } = this as any
+      if (uri) return uri
+    } catch (e) {
+      /* */
+    }
     if (this.parent) return this.parent.closestContainingUri
     return undefined
   }
@@ -213,11 +230,22 @@ export abstract class BaseNode {
       }
     return undefined
   }
+
+  @lazy() get root(): BaseNode {
+    return this.parent ? this.parent.root : this
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  @lazy() get rootCache(): Map<any, any> {
+    if (this.parent) return this.parent.rootCache
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new Map<any, any>()
+  }
 }
 
 export abstract class FileNode extends BaseNode {
   abstract get filePath(): string
-  @lazy() get uri(): string {
+  @lazy() get uri(): DocumentUri {
     return URL_file(this.filePath)
   }
   /**
@@ -233,19 +261,169 @@ export abstract class FileNode extends BaseNode {
     return this.host.existsSync(this.filePath)
   }
   /**
-   * parsed ts-morph source file
+   * parsed ts-morph source file.
+   * this file is cheap to create since it doesn't trigger the processing of any other file in the project
+   * it has no knowledge of related source files, but it does contain the internal structure of the file
    */
   @lazy() get sf(): tsm.SourceFile {
+    if (!this.hasJSLikeExtension)
+      throw new Error(
+        'cannot create ts-morph source file for this type of file ' +
+          this.filePath
+      )
     if (typeof this.text === 'undefined')
       throw new Error('undefined file ' + this.filePath)
     return createTSMSourceFile_cached(this.filePath, this.text!)
   }
+
+  @lazy() get hasJSLikeExtension(): boolean {
+    return ['.js', '.jsx', 'ts', '.tsx'].includes(extname(this.filePath))
+  }
+
+  /**
+   * parsed ts-morph source file.
+   * this is *very expensive* to create since it needs to build the containing project.
+   * prefer this.sf whenever possible.
+   */
+  @lazy() get sf_withReferences(): tsm.SourceFile | undefined {
+    if (!this.hasJSLikeExtension)
+      throw new Error(
+        'cannot create ts-morph source file for this type of file ' +
+          this.filePath
+      )
+    return this.tsm_Project?.getSourceFile(this.filePath)
+  }
+
   @lazy() get basenameNoExt() {
     return basenameNoExt(this.filePath)
   }
+
   @lazy() get basename() {
     return basename(this.filePath)
   }
+
+  @lazy() private get tsm_Project(): tsm.Project | undefined {
+    const tsconfig = ts_findTSOrJSConfig(this.filePath)
+    if (!tsconfig) return undefined
+    const cache = this.rootCache
+    const key = 'ts morph for ' + tsconfig
+    if (cache.has(key)) return cache.get(key)
+    const p = tsm_Project_redwoodFriendly(tsconfig, true)
+    cache.set(key, p)
+    return p
+  }
+
+  /**
+   * Uses a project-wide ts-morph Project and calls sf.getReferencedSourceFiles().
+   * It then maps each file to obtain the corresponding FileNodes
+   */
+  @memo() async allReferencedNodes() {
+    const ff = this.sf_withReferences
+      ?.getReferencedSourceFiles()
+      ?.map((x) => this.root.findNode(x.getFilePath()))
+    if (!ff) return []
+    const ff2 = await Promise.all(ff)
+    return Array_collectInstancesOf(FileNode, ff2)
+  }
+
+  /**
+   * if file follows dirname convention, then this returns
+   * all files in the same dir (mocks, stories, tests, etc)
+   *
+   * for example, for file
+   * src/layouts/MyLayout/MyLayout.js
+   *
+   * it returns
+   * src/layouts/MyLayout/MyLayout.mock.js
+   * src/layouts/MyLayout/MyLayout.stories.js
+   */
+  @lazy() get relatedArtifacts(): DocumentUri[] {
+    // make sure this is a URI
+    const { filePath, uri } = this
+    return iter(function* () {
+      // if this file follows the dirname convention
+      const fdc = followsDirNameConvention(filePath)
+      if (fdc) {
+        // get all files in the same dir
+        const dir = dirname(filePath)
+        for (const dd of readdirSync(dir)) {
+          const file2 = join(dir, dd)
+          const file2URI = URL_file(file2)
+          if (file2URI === uri) continue // do not list same file
+          yield file2URI
+        }
+      }
+    })
+  }
+
+  @lazy() get followsDirNameConvention(): boolean {
+    return followsDirNameConvention(this.filePath)
+  }
+
+  /**
+   * creates the standard name for artifact (if possible)
+   * @param artifactType
+   */
+  @memo() private composeStandardArtifactFilePath(
+    artifactType: 'test' | 'stories' | 'mock'
+  ): string | undefined {
+    if (this.followsDirNameConvention) {
+      const parts = this.filePath.split('.')
+      parts.push(artifactType, parts.pop()!)
+      return parts.join('.')
+    }
+  }
+
+  protected getArtifactChildren(opts?: SpecialArtifactTypeOpts) {
+    const standard = this.getStandardArtifactOutlineChildren(opts)
+    const all = this.relatedArtifacts
+    // remove from 'all' the ones that are already listed as standard (to prevent duplicates)
+    const all2 = all.filter((uri) => !standard.some((e) => e?.uri === uri))
+    const all3 = all2.map((uri) => ({ uri }))
+    return [...standard, ...all3]
+  }
+
+  private getStandardArtifactOutlineChildren(opts?: SpecialArtifactTypeOpts) {
+    if (!this.hasJSLikeExtension) return []
+    const self = this
+    const res = [
+      opts?.test ? artifact('test', 'unit test') : undefined,
+      opts?.mock ? artifact('mock', 'data mock') : undefined,
+      opts?.stories ? artifact('stories', 'storybook stories') : undefined,
+    ]
+    return res.sort((a, b) => sortv(a) - sortv(b))
+    function sortv(x) {
+      return x?.uri ? 0 : 1
+    }
+    function artifact(
+      artifactType: 'test' | 'stories' | 'mock',
+      description: string
+    ) {
+      const test_ = self.composeStandardArtifactFilePath(artifactType)
+      if (test_) {
+        if (self.host.existsSync(test_)) {
+          return {
+            uri: URL_file(test_),
+            outlineDescription: description,
+          } as OutlineInfoProvider
+        } else {
+          const bn = basename(test_)
+          return {
+            key: 'create artifact ' + artifactType,
+            outlineLabel: '',
+            outlineDescription: `${bn} (click to create)`,
+            outlineTooltip: 'click to create file',
+          } as OutlineInfoProvider
+        }
+      }
+    }
+  }
+}
+
+interface SpecialArtifactTypeOpts {
+  test?: boolean
+  mock?: boolean
+  stories?: boolean
 }
 
 export class HostWithDocumentsStore implements Host {

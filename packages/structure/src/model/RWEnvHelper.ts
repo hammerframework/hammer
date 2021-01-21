@@ -6,17 +6,18 @@ import { pickBy } from 'lodash'
 import * as tsm from 'ts-morph'
 import { DiagnosticSeverity, Location, Range } from 'vscode-languageserver'
 
-import { BaseNode, CodeLensX, Definition, HoverX, Reference } from 'src/ide'
-import { lazy } from 'src/x/decorators'
-import { prisma_parseEnvExpressionsInFile } from 'src/x/prisma'
-import { URL_file } from 'src/x/URL'
-import { Command_open } from 'src/x/vscode'
 import {
   ExtendedDiagnostic,
   ExtendedDiagnostic_is,
   LocationLike_toHashLink,
   LocationLike_toLocation,
 } from 'src/x/vscode-languageserver-types'
+
+import { BaseNode, CodeLensX, Definition, HoverX, Reference } from '../ide'
+import { lazy } from '../x/decorators'
+import { prisma_parseEnvExpressionsInFile } from '../x/prisma'
+import { URL_file } from '../x/URL'
+import { Command_open } from '../x/vscode'
 
 import { RWProject } from './RWProject'
 import { process_env_findAll } from './util/process_env'

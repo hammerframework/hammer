@@ -110,7 +110,7 @@ export function LocationLike_toTerminalLink(loc: LocationLike): string {
 
 /**
  * returns vscode-terminal-friendly (clickable) link with line/column information
- * ex: "file:///foo.ts:2:3"
+ * ex: "file:///foo.ts#2:3"
  * @param loc
  */
 export function LocationLike_toHashLink(loc: LocationLike): string {
@@ -160,11 +160,13 @@ function Position_is00(pos: Position): boolean {
   return pos.character === 0 && pos.line === 0
 }
 
-export function ExtendedDiagnostic_is(x: any): x is ExtendedDiagnostic {
+export function ExtendedDiagnostic_is(x: unknown): x is ExtendedDiagnostic {
   if (typeof x !== 'object') return false
   if (typeof x === 'undefined') return false
-  if (typeof x.uri !== 'string') return false
-  if (!Diagnostic.is(x.diagnostic)) return false
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (typeof (x as any).uri !== 'string') return false
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!Diagnostic.is((x as any).diagnostic)) return false
   return true
 }
 
@@ -243,23 +245,27 @@ export interface ExtendedDiagnostic {
 
 /**
  * Helper method to create diagnostics
- * @param node
- * @param message
  */
 export function err(
   loc: LocationLike,
-  message: string,
+  err: string | Omit<Diagnostic, 'range'>,
   code?: number | string
 ): ExtendedDiagnostic {
   const { uri, range } = LocationLike_toLocation(loc)
+  let d: Diagnostic = {
+    range,
+    severity: DiagnosticSeverity.Error,
+    message: '',
+  }
+  if (typeof err === 'string') {
+    d.message = err
+  } else {
+    d = { ...d, ...err }
+  }
+  if (typeof code !== 'undefined') d.code = code
   return {
     uri,
-    diagnostic: {
-      range,
-      message,
-      severity: DiagnosticSeverity.Error,
-      code,
-    },
+    diagnostic: d,
   }
 }
 

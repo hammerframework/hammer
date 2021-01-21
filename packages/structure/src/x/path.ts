@@ -20,6 +20,31 @@ export function followsDirNameConvention(filePath: string): boolean {
   return filePath.endsWith(ending)
 }
 
+/**
+ * artifacts:  x.mock.js, x.test.js, x.stories.js
+ * @param filePath
+ */
+export function isArtifact(filePath: string): boolean {
+  const parts = basenameNoExt(filePath).split('.')
+  if (parts.length === 1) return false
+  const last = parts[parts.length - 1]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return artifactTypes.includes(last as any)
+}
+
+const artifactTypes = ['mock', 'test', 'stories'] as const
+
+export function isNotArtifact(filePath: string): boolean {
+  return !isArtifact(filePath)
+}
+
+export function isArtifactOfType(
+  filePath: string,
+  type: typeof artifactTypes[number]
+): boolean {
+  return basenameNoExt(filePath).endsWith(`.${type}`)
+}
+
 export function basenameNoExt(path: string): string {
   path = normalize(path)
   const parts = basename(path).split('.')

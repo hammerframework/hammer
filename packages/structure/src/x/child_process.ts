@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as child_process from 'child_process'
 
 export type SpawnOut = { stderr: string; stdout: string; code: number }

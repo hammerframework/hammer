@@ -3,6 +3,7 @@ import { basename, resolve } from 'path'
 import { DefaultHost } from '../../hosts'
 import { URL_file } from '../../x/URL'
 import { RWProject } from '../RWProject'
+import { OutlineInfoResolver } from '../types'
 
 describe('Redwood Project Model', () => {
   it('can process example-todo-main', async () => {
@@ -82,6 +83,77 @@ describe('Cells', () => {
       'We recommend that you name your query operation'
     )
     done()
+  })
+})
+
+import { parse as graphql_parse, buildSchema } from 'graphql'
+import {
+  getFieldDef,
+  getHoverInformation,
+  getOutline,
+} from 'graphql-language-service-interface'
+
+describe.only('graphql stuff', async () => {
+  console.log('hello world')
+  // const languageService = new LanguageService({
+  //   schemaConfig: { uri: 'https://my/schema' },
+  // })
+  const exampleschema = `
+    schema {
+      query: Query
+      # mutation: Mutation
+    }
+    type Query {
+      hero(episode: Episode): Character
+    }
+    type Character {
+      name: String!
+      appearsIn: [Episode!]!
+    }
+    enum Episode {
+      NEWHOPE
+      EMPIRE
+      JEDI
+    }
+  `
+  const outline = getOutline(exampleschema)
+  outline //?
+  const schema = buildSchema(exampleschema)
+  schema //?
+  const info = getHoverInformation(schema, '{ hero { name } }', {
+    character: 4,
+    line: 0,
+  })
+  info //?
+})
+
+describe.only('Page', () => {
+  it('Finds page layout', async () => {
+    //const projectRoot = getFixtureDir('example-todo-main')
+    const projectRoot = '/Users/aldo/com.github/redwoodjs/example-blog'
+    const project = new RWProject({ projectRoot, host: new DefaultHost() })
+
+    const rr = new OutlineInfoResolver(project)
+    const item = await rr.treeItem()
+    item //?
+    const cc2 = await rr.children_treeItem()
+    cc2.length //?
+    cc2[0].label //?
+    const children = await item.children()
+    children.length //?
+    // foo
+
+    const cc = await project.outlineChildren()
+    cc.length //?
+
+    const pages = project.pages
+    pages.length //?
+    pages.map((p) => p.basenameNoExt) //?
+    for (const page of pages) {
+      for (const nn of await page.sf_withReferences_referencedSourceFiles_as_FileNodes()) {
+        nn.filePath //?
+      }
+    }
   })
 })
 

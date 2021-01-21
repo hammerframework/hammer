@@ -1,17 +1,16 @@
 import { basename } from 'path'
 
-import { parse as parseGraphQL } from 'graphql/language/parser'
-import * as tsm from 'ts-morph'
+import { MarkupKind } from 'vscode-languageserver'
 
 import { RWError } from '../errors'
-import { FileNode } from '../ide'
+import { CodeLensX, FileNode, HoverX } from '../ide'
 import { iter } from '../x/Array'
-import { lazy } from '../x/decorators'
-import { err } from '../x/vscode-languageserver-types'
+import { lazy, memo } from '../x/decorators'
+import { err, Location_fromNode } from '../x/vscode-languageserver-types'
 
 import { RWProject } from './RWProject'
 import { RWSDLField } from './RWSDLField'
-
+import { GraphQLTaggedTemplateLiteral } from './util/GraphQLTaggedTemplateLiteral'
 export class RWSDL extends FileNode {
   constructor(public filePath: string, public parent: RWProject) {
     super()
@@ -20,17 +19,10 @@ export class RWSDL extends FileNode {
    * The Template Literal node (string) that contains the schema
    */
   @lazy() get schemaStringNode() {
-    const i = this.sf.getVariableDeclaration('schema')?.getInitializer()
-    if (!i) return undefined
-    // TODO: do we allow other kinds of strings? or just tagged literals?
-    if (tsm.Node.isTaggedTemplateExpression(i)) {
-      const t = i.getTemplate() //?
-      if (tsm.Node.isNoSubstitutionTemplateLiteral(t)) return t
-    }
-    return undefined
+    return this.schemaTag?.graphqlStringNode
   }
   @lazy() get schemaString(): string | undefined {
-    return this.schemaStringNode?.getLiteralText()
+    return this.schemaTag?.graphqlString
   }
   @lazy() get serviceFilePath() {
     return this.parent.servicesFilePath(this.name)
@@ -46,8 +38,8 @@ export class RWSDL extends FileNode {
   @lazy() get implementableFields() {
     const self = this
     return iter(function* () {
-      if (!self.schemaString) return //?
-      const ast = parseGraphQL(self.schemaString)
+      const ast = self.schemaTag?.graphqlAST
+      if (!ast) return
       for (const def of ast.definitions)
         if (def.kind === 'ObjectTypeDefinition')
           if (def.name.value === 'Query' || def.name.value === 'Mutation')
@@ -68,4 +60,58 @@ export class RWSDL extends FileNode {
       )
     }
   }
+  *ideInfo() {
+    if (this.schemaTag?.graphqlStringNode) {
+      const location = Location_fromNode(this.schemaTag.graphqlStringNode)
+      yield {
+        kind: 'CodeLens',
+        location,
+        codeLens: {
+          range: location.range,
+          command: {
+            command: 'xx',
+            title: 'show generated schema',
+          },
+        },
+      } as CodeLensX
+
+      const schema = this.parent.graphqlHelper.mergedSchemaString
+      if (schema)
+        yield {
+          kind: 'Hover',
+          location,
+          hover: {
+            contents: {
+              kind: MarkupKind.Markdown,
+              value: ['# Generated Schema', '```graphql', schema, '```'].join(
+                '\n'
+              ),
+            },
+            range: location.range,
+          },
+        } as HoverX
+    }
+  }
+  @lazy() get schemaTag() {
+    const getSchema = () => this.parent.graphqlHelper.mergedSchema
+    for (const x of GraphQLTaggedTemplateLiteral.findAllInSourceFile(
+      this.sf,
+      getSchema
+    ))
+      if (x.variableName === 'schema') return x
+  }
+
+  outlineIcon = 'circuit-board'
+
+  @memo() outlineChildren() {
+    return [
+      ...(this.schemaTag?.graphql_outline || []),
+      {
+        outlineLabel: 'related service',
+        outlineChildren: () => [this.service],
+      },
+    ]
+  }
+
+  outlineLabel = this.basenameNoExt
 }

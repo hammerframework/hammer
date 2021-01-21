@@ -1,3 +1,4 @@
+import { Command_open } from 'src/x/vscode'
 import { parse as parseTOML } from 'toml'
 import { Range } from 'vscode-languageserver-types'
 
@@ -35,5 +36,13 @@ export class RWTOML extends FileNode {
     //this.parsedTOML //?
     //const allowedTopElements = ['web', 'api']
     // TODO: check that schema is correct
+  }
+  outlineLabel = 'redwood.toml'
+  outlineIcon = 'x-redwood'
+  outlineMenu = {
+    kind: 'withDoc',
+    doc: Command_open(
+      'https://redwoodjs.com/docs/app-configuration-redwood-toml'
+    ),
   }
 }

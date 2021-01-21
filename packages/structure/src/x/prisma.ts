@@ -28,6 +28,7 @@ export function* prisma_parseEnvExpressionsInFile(
  */
 export function* prisma_parseEnvExpressions(src: string) {
   const re = /env\(([^)]+)\)/gm
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const match of (src as any).matchAll(re)) {
     try {
       const start = Position_fromOffsetOrFail(match.index, src)

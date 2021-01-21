@@ -1,11 +1,17 @@
 import { Connection } from 'vscode-languageserver'
 
 /**
- * will monkey patch the connection object
+ * This method will monkey patch an LSP Connection object
  * so that any errors thrown by subsequently installed handlers are caught and logged
+ * on the LSP server side (before being sent back over the wire).
+ *
  * (ex: connection.onHover(() => throw new Error('oops!')))
- * this prevents the LSP client, on the other end, to receive errors
- * which can sometimes cause error messages to pop-up uncontrollably
+ *
+ * This prevents the LSP client, on the other end, to receive errors
+ * which can sometimes cause error messages to pop-up uncontrollably.
+ *
+ * This is a brute force solution and it is probably catching errors that should somehow
+ * be reported back to the user.
  *
  * @param conn
  */

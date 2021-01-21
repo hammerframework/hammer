@@ -1,8 +1,12 @@
-import { FileNode } from '../ide'
-import { RWProject } from '../model'
-import { RWPage } from '../model/RWPage'
-import { RWRoute } from '../model/RWRoute'
-import { URL_file } from '../x/URL'
+import { readdirSync } from 'fs-extra'
+import { partition } from 'lodash'
+import { dirname, join } from 'path'
+import { RWServiceFunction } from 'src/model/RWServiceFunction'
+import { followsDirNameConvention } from 'src/x/path'
+import { DocumentUri } from 'vscode-languageserver'
+import { BaseNode, FileNode } from '../ide'
+import { RWCell, RWPage, RWProject, RWRoute, RWService } from '../model'
+import { URL_file, URL_toFile } from '../x/URL'
 import { Command_cli, Command_open, TreeItem2 } from '../x/vscode'
 
 export function getOutline(project: RWProject): TreeItem2 {
@@ -68,7 +72,7 @@ export function getOutline(project: RWProject): TreeItem2 {
 function _router(project: RWProject): TreeItem2 {
   const { router } = project
   return {
-    label: 'Routes.js',
+    label: 'routes',
     ...resourceUriAndCommandFor(router.uri),
     iconPath: 'globe',
     children: () => router.routes.map(_router_route),
@@ -111,9 +115,9 @@ function _pages(project: RWProject): TreeItem2 {
 function _pages_page(page: RWPage): TreeItem2 {
   return {
     id: page.id,
-    label: page.basename,
+    label: page.outlineLabel,
     ...resourceUriAndCommandFor(page.uri),
-    description: page.route?.path,
+    description: page.outlineLabel,
     children: () => [
       _rwcli_command_group({
         cmd: 'rw destroy page ' + page.basenameNoExt,
@@ -127,7 +131,7 @@ function _components(project: RWProject): TreeItem2 {
   return {
     label: 'components',
     iconPath: 'extensions',
-    children: () => fromFiles(project.components),
+    children: () => fromFiles(project.components.filter((c) => !c.isCell)),
     menu: {
       kind: 'group',
       add: Command_cli('rw generate component ...'),
@@ -155,7 +159,7 @@ function _cells(project: RWProject): TreeItem2 {
   return {
     label: 'cells',
     iconPath: 'circuit-board',
-    children: () => fromFiles(project.cells),
+    children: () => project.cells.map(render),
     menu: {
       kind: 'group',
       add: Command_cli('rw generate cell ...'),
@@ -178,12 +182,19 @@ function _services(project: RWProject): TreeItem2 {
 }
 
 function _functions(project: RWProject): TreeItem2 {
+  const [fs_b, fs] = partition(project.functions, (f) => f.isBackground)
   return {
     label: 'functions',
     iconPath: 'server-process',
     // TODO: link to published function
     // http://localhost:8911/graphql
-    children: () => fromFiles(project.functions),
+    children: () => [
+      ...fromFiles(fs),
+      {
+        label: 'background functions',
+        children: () => fromFiles(fs_b),
+      },
+    ],
     menu: {
       kind: 'group',
       add: Command_cli('rw generate function ...'),
@@ -278,11 +289,16 @@ function _rwcli_command(opts: RWOpts): TreeItem2 {
   }
 }
 
-function fromFiles(fileNodes: FileNode[]): TreeItem2[] {
+function fromFiles(
+  fileNodes: any //FileNode[]
+): TreeItem2[] {
   return fileNodes.map(fromFile)
 }
 
-function fromFile(fileNode: FileNode): TreeItem2 {
+function fromFile(
+  fileNode: any
+  //FileNode
+): TreeItem2 {
   return {
     label: fileNode.basename,
     ...resourceUriAndCommandFor(fileNode.uri),
@@ -296,5 +312,66 @@ function resourceUriAndCommandFor(
   return {
     resourceUri: uri,
     command: Command_open(uri),
+  }
+}
+
+type RenderableNode = DocumentUri | BaseNode | TreeItem2
+
+function render(x: any /*BaseNode*/): TreeItem2 {
+  if (x instanceof RWCell) {
+    return {
+      ...fromFile(x),
+      children: () => renderRelatedArtifacts(x.uri),
+    }
+  }
+  // if (x instanceof RWService) {
+  //   return {
+  //     ...fromFile(x),
+  //     children: () => {
+  //       x.funcs.map(render)
+  //       return renderRelatedArtifacts(x.uri)
+  //     },
+  //   }
+  // }
+
+  if (x instanceof RWServiceFunction) {
+    return {
+      label: x.name,
+    }
+  }
+  // basic catch-all for file nodes
+  if (x instanceof FileNode) {
+    return {
+      ...fromFile(x),
+      children: () => renderRelatedArtifacts(x.uri),
+    }
+  }
+  throw new Error('render not implemented for node type ' + x)
+}
+
+function renderRelatedArtifacts(fileURI: string): TreeItem2[] {
+  return Array.from(relatedArtifacts(fileURI)).map(resourceUriAndCommandFor)
+}
+
+/**
+ * if file follows dirname convention, then this returns
+ * all files in the same dir (mocks, stories, tests, etc)
+ * @param fileURI
+ */
+function* relatedArtifacts(fileURI: string) {
+  // make sure this is a URI
+  fileURI = URL_file(fileURI)
+  const filePath = URL_toFile(fileURI)
+  // if this file follows the dirname convention
+  const fdc = followsDirNameConvention(filePath)
+  if (fdc) {
+    // get all files in the same dir
+    const dir = dirname(filePath)
+    for (const dd of readdirSync(dir)) {
+      const file2 = join(dir, dd)
+      const file2URI = URL_file(file2)
+      if (file2URI === fileURI) continue // do not list same file
+      yield file2URI
+    }
   }
 }

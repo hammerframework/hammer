@@ -107,6 +107,11 @@ export class TreeItem2Wrapper {
     if (!this.parent) return []
     return [...(this.parent?.keys ?? []), this.key]
   }
+  /**
+   * They key of an item is
+   * - if item.key is defined, then we use that value
+   * - otherwise we "compose" a key made of item.label + indexInParent
+   */
   @lazy() get key(): string {
     const {
       indexInParent,
@@ -191,21 +196,21 @@ type RemoteTreeDataProvider = ReplacePropTypes<
 
 export class RemoteTreeDataProviderImpl implements RemoteTreeDataProvider {
   constructor(
-    private getRoot: () => TreeItem2,
+    private getRoot: () => Promise<TreeItem2>,
     private refreshInterval = 5000
   ) {}
 
   private root!: TreeItem2Wrapper
 
-  private refresh() {
-    this.root = new TreeItem2Wrapper(this.getRoot())
+  private async refresh() {
+    this.root = new TreeItem2Wrapper(await this.getRoot())
   }
 
   @memo()
-  private lazyInit() {
-    this.refresh()
-    setInterval(() => {
-      this.refresh()
+  private async lazyInit() {
+    await this.refresh()
+    setInterval(async () => {
+      await this.refresh()
       for (const l of this.listeners) l(undefined)
     }, this.refreshInterval)
   }
@@ -220,7 +225,7 @@ export class RemoteTreeDataProviderImpl implements RemoteTreeDataProvider {
   }
 
   async getTreeItem(id: string): Promise<SerializableTreeItem> {
-    this.lazyInit()
+    await this.lazyInit()
     //console.log('getTreeItem', id)
     const keys = JSON.parse(id)
     const item = await this.root.findChildRec(keys)
@@ -230,7 +235,7 @@ export class RemoteTreeDataProviderImpl implements RemoteTreeDataProvider {
   }
 
   async getChildren(id?: string): Promise<string[]> {
-    this.lazyInit()
+    await this.lazyInit()
     //console.log('getChildren', id)
     const keys = id ? JSON.parse(id) : []
     const self = await this.root.findChildRec(keys)
@@ -291,7 +296,10 @@ function isThenable(x: unknown): x is Thenable<unknown> {
   return typeof x['then'] === 'function'
 }
 
-export function Command_open(uriOrLocation: string | Location): Command {
+export function Command_open(
+  uriOrLocation: string | Location,
+  title = 'open'
+): Command {
   const { uri, range } = Location.is(uriOrLocation)
     ? uriOrLocation
     : { uri: uriOrLocation, range: undefined }
@@ -299,13 +307,13 @@ export function Command_open(uriOrLocation: string | Location): Command {
     return {
       command: 'vscode.open',
       arguments: [uri],
-      title: 'open',
+      title,
     }
   }
   return {
     command: 'vscode.open',
     arguments: [uri, { selection: range, preserveFocus: true }],
-    title: 'open',
+    title,
   }
 }
 
@@ -316,6 +324,7 @@ export function Command_cli(cmd: string, title = 'run...'): Command {
   return { command: 'redwoodjs.cli', arguments: [cmd], title }
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 type ReplacePropTypes<T extends {}, Replacements extends {}> = {
   [K in keyof T]: K extends keyof Replacements ? Replacements[K] : T[K]
 }

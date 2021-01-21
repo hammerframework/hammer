@@ -1,11 +1,10 @@
-import { parse as parseGraphQL } from 'graphql'
-import * as tsm from 'ts-morph'
 import { DiagnosticSeverity } from 'vscode-languageserver-types'
 
 import { lazy } from '../x/decorators'
 import { err, Range_fromNode } from '../x/vscode-languageserver-types'
 
 import { RWComponent } from './RWComponent'
+import { GraphQLTaggedTemplateLiteral } from './util/GraphQLTaggedTemplateLiteral'
 
 export class RWCell extends RWComponent {
   /**
@@ -16,52 +15,40 @@ export class RWCell extends RWComponent {
     return !this.hasDefaultExport && this.exportedSymbols.has('QUERY')
   }
 
-  // TODO: Move to RWCellQuery
   @lazy() get queryStringNode() {
-    const i = this.sf.getVariableDeclaration('QUERY')?.getInitializer()
-    if (!i) {
-      return undefined
-    }
-    // TODO: do we allow other kinds of strings? or just tagged literals?
-    if (tsm.Node.isTaggedTemplateExpression(i)) {
-      const t = i.getTemplate()
-      if (tsm.Node.isNoSubstitutionTemplateLiteral(t)) {
-        return t
-      }
-    }
-    return undefined
+    return this.queryTag?.graphqlStringNode
   }
 
-  // TODO: Move to RWCellQuery
   @lazy() get queryString(): string | undefined {
-    return this.queryStringNode?.getLiteralText()
+    return this.queryTag?.graphqlString
   }
 
-  // TODO: Move to RWCellQuery
   @lazy() get queryAst() {
-    const qs = this.queryString
-    if (!qs) {
-      return undefined
-    }
-    return parseGraphQL(qs)
+    return this.queryTag?.graphqlAST
   }
 
-  // TODO: Move to RWCellQuery
   @lazy() get queryOperationName(): string | undefined {
-    const ast = this.queryAst
-    if (!ast) {
-      return undefined
-    }
-    for (const def of ast.definitions) {
-      if (def.kind == 'OperationDefinition') {
-        return def?.name?.value
-      }
-    }
-    return undefined
+    return this.queryTag?.operationName
+  }
+
+  /**
+   * A Cell can have multiple GraphQL tags
+   * the main one is QUERY, but a user can declare as many as they want
+   */
+  @lazy() get graphqlTags() {
+    return Array.from(
+      GraphQLTaggedTemplateLiteral.findAllInSourceFile(
+        this.sf,
+        () => this.parent.graphqlHelper.mergedSchema
+      )
+    )
+  }
+
+  @lazy() get queryTag() {
+    return this.graphqlTags.find((t) => t.variableName === 'QUERY')
   }
 
   *diagnostics() {
-    // check that QUERY and Success are exported
     if (!this.exportedSymbols.has('QUERY')) {
       yield err(
         this.uri,
@@ -85,7 +72,7 @@ export class RWCell extends RWComponent {
       yield {
         uri: this.uri,
         diagnostic: {
-          // TODO: Try to figure out if we can point directly to the syntax error.
+          // TODO: point directly to the syntax error.
           range: Range_fromNode(this.sf.getVariableDeclaration('QUERY')!),
           message: e.message,
           severity: DiagnosticSeverity.Error,
@@ -93,12 +80,26 @@ export class RWCell extends RWComponent {
       }
     }
 
-    // TODO: check that exported QUERY is semantically valid GraphQL (fields exist)
     if (!this.exportedSymbols.has('Success')) {
       yield err(
         this.uri,
         'Every Cell MUST export a Success variable (React Component)'
       )
     }
+    // TODO: check that exported QUERY is semantically valid GraphQL (fields exist)
   }
+  outlineChildren() {
+    const tags = this.graphqlTags.map((t) => ({
+      outlineLabel: t.variableName,
+      outlineChildren: t.graphql_outline,
+    }))
+    return [
+      ...this.getArtifactChildren({ test: true, mock: true, stories: true }),
+      ...tags,
+    ]
+  }
+
+  outlineIcon = 'circuit-board'
+
+  outlineLabel = this.basenameNoExt
 }

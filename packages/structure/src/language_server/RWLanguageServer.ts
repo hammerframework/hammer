@@ -47,6 +47,7 @@ export class RWLanguageServer {
           },
           implementationProvider: true,
           definitionProvider: true,
+          referencesProvider: true,
           codeActionProvider: true,
           codeLensProvider: { resolveProvider: false },
           executeCommandProvider: this.commands.options,
@@ -89,6 +90,13 @@ export class RWLanguageServer {
           return i.target
         }
       }
+    })
+
+    connection.onReferences(async ({ textDocument: { uri }, position }) => {
+      const info = await this.info(uri, 'Reference')
+      return info
+        .filter((i) => Range_contains(i.location.range, position))
+        .map((i) => i.target)
     })
 
     connection.onDocumentLinks(async ({ textDocument: { uri } }) => {
@@ -163,6 +171,7 @@ export class RWLanguageServer {
   ): Promise<(IDEInfo & { kind: T })[]> {
     return (await this.collectIDEInfo(uri)).filter(
       (i) => i.kind === kind
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any
   }
 
