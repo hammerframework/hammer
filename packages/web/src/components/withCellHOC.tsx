@@ -1,33 +1,38 @@
 import type { DocumentNode } from 'graphql'
 
-import { useQuery, OperationResult } from './GraphQLHooksProvider'
+import { OperationResult } from 'src/graphql'
+
+import { useQuery } from './GraphQLHooksProvider'
+
+export type DataObject = Record<string, unknown>
+
+export type OperationVariables = Record<string, unknown>
 
 const Query: React.FunctionComponent<{
   query: DocumentNode
-  children: (result: OperationResult) => React.ReactElement
+  children: (result: OperationResult<DataObject>) => React.ReactElement
 }> = ({ children, query, ...rest }) => {
-  const result = useQuery(query, rest)
+  const result = useQuery<DataObject, OperationVariables>(query, rest)
   return children && result ? children(result) : null
 }
 
-export type DataObject = { [key: string]: unknown }
-
 export type CellFailureStateComponent = Omit<
-  OperationResult,
+  OperationResult<DataObject>,
   'data' | 'loading'
 >
 export type CellLoadingEmptyStateComponent = Omit<
-  OperationResult,
+  OperationResult<DataObject>,
   'error' | 'loading' | 'data'
 >
 export type CellSuccessStateComponent =
-  | Omit<OperationResult, 'error' | 'loading' | 'data'>
+  | Omit<OperationResult<unknown>, 'error' | 'loading' | 'data'>
   | DataObject
 
 export interface WithCellProps {
-  beforeQuery?: <TProps>(props: TProps) => { variables: TProps }
-  // @ts-expect-error We do not know, and even really care, what they are here.
-  QUERY: DocumentNode | (({ variables: unknown }) => DocumentNode)
+  beforeQuery?: <TVariables>(variables: TVariables) => { variables: TVariables }
+  QUERY:
+    | DocumentNode
+    | (<TVariables>({ variables }: { variables: TVariables }) => DocumentNode)
   afterQuery?: (data: DataObject) => DataObject
   Loading?: React.FC<CellLoadingEmptyStateComponent>
   Failure?: React.FC<CellFailureStateComponent>
@@ -71,8 +76,8 @@ export interface WithCellProps {
  * }
  */
 export const withCell = ({
-  beforeQuery = (props) => ({
-    variables: props,
+  beforeQuery = (variables) => ({
+    variables,
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-first',
   }),
