@@ -1,0 +1,33 @@
+{
+  "name": "@redwoodjs/mobile",
+  "version": "0.24.0",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "license": "MIT",
+  "dependencies": {
+    "@redwoodjs/internal": "^0.24.0",
+    "react-native": "^0.63.4"
+  },
+  "devDependencies": {},
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/dist/"
+    ]
+  },
+  "peerDependencies": {
+    "react": "*"
+  },
+  "scripts": {
+    "build": "yarn build:js && yarn build:types",
+    "prepublishOnly": "yarn cross-env NODE_ENV=production yarn build",
+    "build:js": "babel src -d dist --extensions \".js,.ts,.tsx\"",
+    "build:types": "ttsc --build --verbose",
+    "build:watch": "nodemon --watch src --ext \"js,ts,tsx\" --ignore dist --exec \"yarn build\"",
+    "test": "jest",
+    "test:watch": "yarn test --watch"
+  },
+  "gitHead": "c235e7d7186e5e258764699c0e0e1d5cc0fdd0b5"
+}
