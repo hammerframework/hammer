@@ -12,8 +12,11 @@ import type { PluginObj, types } from '@babel/core'
 // A cell can export the declarations below.
 const EXPECTED_EXPORTS_FROM_CELL = [
   'beforeQuery',
+  'beforeSubscription',
   'QUERY',
+  'SUBSCRIPTION',
   'afterQuery',
+  'afterSubscription',
   'Loading',
   'Success',
   'Failure',
@@ -58,9 +61,13 @@ export default function ({ types: t }: { types: typeof types }): PluginObj {
       Program: {
         exit(path) {
           // Validate that this file has exports which are "cell-like":
-          // If the user is not exporting `QUERY` and has a default export then
+          // If the user is not exporting `QUERY` or `SUBSCRIPTION` and has a default export then
           // it's likely not a cell.
-          if (hasDefaultExport && !exportNames.includes('QUERY')) {
+          if (
+            hasDefaultExport &&
+            !exportNames.includes('QUERY') &&
+            !exportNames.includes('SUBSCRIPTION')
+          ) {
             return
           }
 

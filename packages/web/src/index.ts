@@ -9,6 +9,7 @@ export {
 export {
   GraphQLHooksProvider,
   useQuery,
+  useSubscription,
   useMutation,
 } from './components/GraphQLHooksProvider'
 

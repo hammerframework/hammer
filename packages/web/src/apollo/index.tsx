@@ -5,10 +5,14 @@ import {
   ApolloLink,
   InMemoryCache,
   useQuery,
+  useSubscription,
   useMutation,
   createHttpLink,
+  split,
 } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
+import { WebSocketLink } from '@apollo/client/link/ws'
+import { getMainDefinition } from '@apollo/client/utilities'
 
 import { AuthContextInterface, useAuth } from '@redwoodjs/auth'
 
@@ -59,12 +63,55 @@ const ApolloProviderWithFetchConfig: React.FunctionComponent<{
 
   const httpLink = createHttpLink({ uri })
 
+  const wsUri = uri.startsWith('https')
+    ? uri.replace(/^https/, 'wss')
+    : uri.replace(/^http/, 'ws')
+
+  /**
+   * https://github.com/apollographql/apollo-client/issues/3967
+   * Only include the connectionParams property if
+   * isAuthenticated (token available) is true
+   */
+  let wsLinkOptions
+  if (isAuthenticated) {
+    wsLinkOptions = {
+      reconnect: true,
+      lazy: true,
+      connectionParams: async () => {
+        const token = await getToken()
+        return {
+          headers: {
+            'auth-provider': authProviderType,
+            authorization: `Bearer ${token}`,
+          },
+        }
+      },
+    }
+  } else {
+    wsLinkOptions = { reconnect: true, lazy: true }
+  }
+  const wsLink = new WebSocketLink({
+    uri: wsUri,
+    options: wsLinkOptions,
+  })
+
+  const splitLink = split(
+    ({ query }) => {
+      const definition = getMainDefinition(query)
+      return (
+        definition.kind === 'OperationDefinition' &&
+        definition.operation === 'subscription'
+      )
+    },
+    wsLink,
+    httpLink
+  )
+
   const client = new ApolloClient({
     cache: new InMemoryCache(),
     ...config,
-    link: ApolloLink.from([withToken, authMiddleware.concat(httpLink)]),
+    link: ApolloLink.from([withToken, authMiddleware.concat(splitLink)]),
   })
-
   return <ApolloProvider client={client}>{children}</ApolloProvider>
 }
 
@@ -75,7 +122,11 @@ export const RedwoodApolloProvider: React.FunctionComponent<{
   return (
     <FetchConfigProvider useAuth={useAuth}>
       <ApolloProviderWithFetchConfig config={graphQLClientConfig}>
-        <GraphQLHooksProvider useQuery={useQuery} useMutation={useMutation}>
+        <GraphQLHooksProvider
+          useQuery={useQuery}
+          useSubscription={useSubscription}
+          useMutation={useMutation}
+        >
           <FlashProvider>{children}</FlashProvider>
         </GraphQLHooksProvider>
       </ApolloProviderWithFetchConfig>

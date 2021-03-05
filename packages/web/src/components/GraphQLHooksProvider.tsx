@@ -19,6 +19,11 @@ export interface GraphQLHooks {
     query: DocumentNode,
     options?: GraphQLHookOptions
   ) => OperationResult
+  useSubscription: (
+    subscription: DocumentNode,
+    options?: GraphQLHookOptions
+  ) => OperationResult
+
   useMutation: (
     mutation: DocumentNode,
     options?: GraphQLHookOptions
@@ -30,6 +35,11 @@ export const GraphQLHooksContext = React.createContext<GraphQLHooks>({
       'You must register a useQuery hook via the `GraphQLHooksProvider`'
     )
   },
+  useSubscription: () => {
+    throw new Error(
+      'You must register a useSubscription hook via the `GraphQLHooksProvider`'
+    )
+  },
   useMutation: () => {
     throw new Error(
       'You must register a useMutation hook via the `GraphQLHooksProvider`'
@@ -38,9 +48,9 @@ export const GraphQLHooksContext = React.createContext<GraphQLHooks>({
 })
 
 /**
- * GraphQLHooksProvider stores standard `useQuery` and `useMutation` hooks for Redwood
- * that can be mapped to your GraphQL library of choice's own `useQuery`
- * and `useMutation` implementation.
+ * GraphQLHooksProvider stores standard `useQuery`, `useSubscription` and `useMutation` hooks for Redwood
+ * that can be mapped to your GraphQL library of choice's own `useQuery`,
+ * `useSubscription` and `useMutation` implementation.
  *
  * @todo Let the user pass in the additional type for options.
  */
@@ -49,15 +59,20 @@ export const GraphQLHooksProvider: React.FunctionComponent<{
     query: DocumentNode,
     options?: GraphQLHookOptions
   ) => OperationResult
+  useSubscription: (
+    subscription: DocumentNode,
+    options?: GraphQLHookOptions
+  ) => OperationResult
   useMutation: (
     mutation: DocumentNode,
     options?: GraphQLHookOptions
   ) => MutationOperationResult
-}> = ({ useQuery, useMutation, children }) => {
+}> = ({ useQuery, useSubscription, useMutation, children }) => {
   return (
     <GraphQLHooksContext.Provider
       value={{
         useQuery,
+        useSubscription,
         useMutation,
       }}
     >
@@ -71,6 +86,13 @@ export function useQuery<TData = any>(
   options?: GraphQLHookOptions
 ): OperationResult<TData> {
   return React.useContext(GraphQLHooksContext).useQuery(query, options)
+}
+
+export function useSubscription<TData = any>(
+  subscription: DocumentNode,
+  options?: GraphQLHookOptions
+): OperationResult<TData> {
+  return React.useContext(GraphQLHooksContext).useSubscription(subscription, options)
 }
 
 export function useMutation<TData = any>(
