@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@redwoodjs/auth": "0.34.1",
+    "@redwoodjs/history": "0.34.1",
     "@redwoodjs/internal": "0.34.1",
     "@redwoodjs/router": "0.34.1",
     "@redwoodjs/web": "0.34.1",

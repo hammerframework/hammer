@@ -16,6 +16,7 @@
   "dependencies": {
     "@babel/register": "7.13.16",
     "@redwoodjs/auth": "0.34.1",
+    "@redwoodjs/history": "0.34.1",
     "@redwoodjs/internal": "0.34.1",
     "@redwoodjs/router": "0.34.1",
     "@redwoodjs/structure": "0.34.1",

@@ -1,5 +1,7 @@
 import type { Auth0Client as Auth0 } from '@auth0/auth0-spa-js'
 
+import { HistoryState } from '@redwoodjs/history'
+
 import type { AuthClient } from './'
 
 export type AuthClientAuth0 = AuthClient
@@ -9,7 +11,10 @@ export type { Auth0 }
 // TODO: Map out this user properly.
 export interface Auth0User {}
 
-export const auth0 = (client: Auth0): AuthClientAuth0 => {
+export const auth0 = (
+  client: Auth0,
+  history: HistoryState
+): AuthClientAuth0 => {
   return {
     type: 'auth0',
     client,
@@ -19,7 +24,7 @@ export const auth0 = (client: Auth0): AuthClientAuth0 => {
         global?.location?.search?.includes('state=')
       ) {
         const { appState } = await client.handleRedirectCallback()
-        window.history.replaceState(
+        history.replace(
           {},
           document.title,
           appState && appState.targetUrl

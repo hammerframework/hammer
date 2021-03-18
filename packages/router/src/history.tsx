@@ -19,7 +19,14 @@ const createHistory = () => {
         global?.location?.hash !== hash
       ) {
         global.history.pushState({}, '', to)
+
+        for (const listener of Object.values(listeners)) {
+          listener()
+        }
       }
+    },
+    jump: (to: string, title = '') => {
+      global.history.replaceState({}, title, to)
 
       for (const listener of Object.values(listeners)) {
         listener()

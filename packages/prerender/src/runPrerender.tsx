@@ -7,6 +7,7 @@ import babelRequireHook from '@babel/register'
 import cheerio from 'cheerio'
 import ReactDOMServer from 'react-dom/server'
 
+import { HistoryProvider } from '@redwoodjs/history'
 import { getPaths } from '@redwoodjs/internal'
 import { LocationProvider } from '@redwoodjs/router'
 
@@ -60,13 +61,11 @@ export const runPrerender = async ({
   const { default: App } = await import(getPaths().web.app)
 
   const componentAsHtml = ReactDOMServer.renderToString(
-    <LocationProvider
-      location={{
-        pathname: routerPath,
-      }}
-    >
-      <App />
-    </LocationProvider>
+    <HistoryProvider>
+      <LocationProvider location={{ pathname: routerPath }}>
+        <App />
+      </LocationProvider>
+    </HistoryProvider>
   )
 
   const { helmet } = global.__REDWOOD__HELMET_CONTEXT

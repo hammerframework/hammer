@@ -1,5 +1,6 @@
 {
   "references": [
+    { "path": "packages/history" },
     { "path": "packages/internal" },
     { "path": "packages/structure" },
     { "path": "packages/core" },

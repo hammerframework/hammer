@@ -14,6 +14,7 @@
   "references": [
     { "path": "../web" },
     { "path": "../router" },
+    { "path": "../history" },
     { "path": "../internal" },
     { "path": "../auth" },
     { "path": "../structure" }
