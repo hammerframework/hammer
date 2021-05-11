@@ -4,7 +4,7 @@ import type { SupportedAuthTypes } from '@redwoodjs/auth'
 
 import type { GlobalContext } from 'src/globalContext'
 
-import { decodeToken } from './decoders'
+import { decodeToken, isAuthHeaderUsedByType } from './decoders'
 
 // This is shared by `@redwoodjs/web`
 const AUTH_PROVIDER_HEADER = 'auth-provider'
@@ -58,6 +58,13 @@ export const getAuthenticationContext = async ({
   // and none of this is auth malarky is required.
   if (!type) {
     return undefined
+  }
+  const tokenUsedByType =
+    isAuthHeaderUsedByType[type] === undefined
+      ? true
+      : isAuthHeaderUsedByType[type]
+  if (!tokenUsedByType) {
+    return [{}, { type, token: '', schema: '' }, { event, context }]
   }
 
   let decoded = null

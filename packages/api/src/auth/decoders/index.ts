@@ -34,6 +34,21 @@ const typesToDecoders: Record<
   supabase: supabase,
   ethereum: ethereum,
   custom: noop,
+  supertokens: noop,
+}
+
+export const isAuthHeaderUsedByType: Record<SupportedAuthTypes, boolean> = {
+  auth0: true,
+  azureActiveDirectory: true,
+  netlify: true,
+  goTrue: true,
+  magicLink: true,
+  firebase: true,
+  supabase: true,
+  ethereum: true,
+  nhost: true,
+  custom: true,
+  supertokens: false,
 }
 
 export const decodeToken = async (

@@ -35,11 +35,24 @@ const expressResponseForLambdaResult = (
   expressResFn: Response,
   lambdaResult: APIGatewayProxyResult
 ) => {
-  const { statusCode = 200, headers, body = '' } = lambdaResult
+  // Old code: const { statusCode = 200, headers, body = '' } = lambdaResult
+  const {
+    statusCode = 200,
+    headers,
+    body = '',
+    multiValueHeaders,
+  } = lambdaResult
 
   if (headers) {
     Object.keys(headers).forEach((headerName) => {
       const headerValue: any = headers[headerName]
+      expressResFn.setHeader(headerName, headerValue)
+    })
+  }
+  // added new block to handle multiValueHeaders
+  if (multiValueHeaders) {
+    Object.keys(multiValueHeaders).forEach((headerName) => {
+      const headerValue: Array<any> = multiValueHeaders[headerName]
       expressResFn.setHeader(headerName, headerValue)
     })
   }

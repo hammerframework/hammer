@@ -19,6 +19,7 @@
     "msal": "^1.4.10",
     "netlify-identity-widget": "1.9.1",
     "nhost-js-sdk": "^3.0.0-14",
+    "supertokens-auth-react": "^0.11.0",
     "react": "^17.0.1"
   },
   "scripts": {
