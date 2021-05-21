@@ -31,18 +31,15 @@ function createDummyAuthContextValues(partial: Partial<AuthContextInterface>) {
   return { ...authContextValues, ...partial }
 }
 
-const mockUseAuth =
-  (
-    {
-      isAuthenticated = false,
-      loading = false,
-    }: { isAuthenticated?: boolean; loading?: boolean } = {
-      isAuthenticated: false,
-      loading: false,
-    }
-  ) =>
-  () =>
-    createDummyAuthContextValues({ loading, isAuthenticated })
+const mockUseAuth = (
+  {
+    isAuthenticated = false,
+    loading = false,
+  }: { isAuthenticated?: boolean; loading?: boolean } = {
+    isAuthenticated: false,
+    loading: false,
+  }
+) => () => createDummyAuthContextValues({ loading, isAuthenticated })
 
 // SETUP
 const HomePage = () => <h1>Home Page</h1>
@@ -464,10 +461,8 @@ test('renders first matching route only', async () => {
   expect(screen.queryByText(/param/)).not.toBeInTheDocument()
 })
 
-test('renders first matching route only with auth', async () => {
-  const ParamPage = ({ param }: { param: string }) => (
-    <div>param {param}</div>
-  )
+test('renders first matching route only, also with Private', async () => {
+  const ParamPage = ({ param }: { param: string }) => <div>param {param}</div>
 
   const TestRouter = () => (
     <Router useAuth={mockUseAuth()}>
