@@ -31,18 +31,21 @@ function createDummyAuthContextValues(partial: Partial<AuthContextInterface>) {
   return { ...authContextValues, ...partial }
 }
 
-const mockUseAuth =
-  (
-    {
-      isAuthenticated = false,
-      loading = false,
-    }: { isAuthenticated?: boolean; loading?: boolean } = {
-      isAuthenticated: false,
-      loading: false,
-    }
-  ) =>
-  () =>
-    createDummyAuthContextValues({ loading, isAuthenticated })
+interface MockUseAuth {
+  isAuthenticated?: boolean
+  loading?: boolean
+}
+
+const mockUseAuthDefaults = {
+  isAuthenticated: false,
+  loading: false,
+}
+
+const mockUseAuth = ({
+  isAuthenticated = false,
+  loading = false,
+}: MockUseAuth = mockUseAuthDefaults) => () =>
+  createDummyAuthContextValues({ loading, isAuthenticated })
 
 // SETUP
 const HomePage = () => <h1>Home Page</h1>
@@ -451,6 +454,30 @@ test('renders first matching route only', async () => {
       <Route path="/" page={HomePage} name="home" />
       <Route path="/about" page={AboutPage} name="about" />
       <Route path="/{param}" page={ParamPage} name="param" />
+    </Router>
+  )
+
+  const screen = render(<TestRouter />)
+
+  await waitFor(() => screen.getByText(/Home Page/))
+
+  // go to about page, and make sure that's the only page rendered
+  act(() => navigate(routes.about()))
+  await waitFor(() => screen.getByText('About Page'))
+  expect(screen.queryByText(/param/)).not.toBeInTheDocument()
+})
+
+test('renders first matching route only, also with Private', async () => {
+  const ParamPage = ({ param }: { param: string }) => <div>param {param}</div>
+
+  const TestRouter = () => (
+    <Router useAuth={mockUseAuth()}>
+      <Route path="/" page={HomePage} name="home" />
+      <Route path="/login" page={LoginPage} name="login" />
+      <Route path="/about" page={AboutPage} name="about" />
+      <Private unauthenticated="login">
+        <Route path="/{param}" page={ParamPage} name="param" />
+      </Private>
     </Router>
   )
 

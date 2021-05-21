@@ -150,6 +150,8 @@ const Router: React.FC<RouterProps> = ({
     return <SplashPage />
   }
 
+  // Validate all paths, and populate the named routes map (that is later
+  // exported as `routes`).
   flatChildArray.forEach((child) => {
     if (isRoute(child)) {
       const { name, path } = child.props
@@ -180,6 +182,18 @@ const Router: React.FC<RouterProps> = ({
   )
 }
 
+/**
+ * Scans all routes for:
+ *  - A match to the current location
+ *  - The NotFoundPage
+ *  - The name of the current route
+ *
+ * If no matching route is found, and we found a NotFoundPage the NotFoundPage
+ * page will be rendered, otherwise the children will be rendered.
+ * We need to render all children, and not just the single route that matches
+ * the current location in order to also render all layouts etc that might be
+ * provided by Sets.
+ */
 const RouteScanner: React.FC = ({ children }) => {
   const location = useLocation()
   const routerState = useRouterState()
