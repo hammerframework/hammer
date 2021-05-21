@@ -1,10 +1,10 @@
 import React, { ReactElement, ReactNode, useCallback } from 'react'
 
 import { Redirect } from './links'
+import { useRouteName } from './RouteNameContext'
 import { useRouterState } from './router-context'
 import { isRoute } from './router'
 import { flattenAll } from './util'
-import { useRouteName } from './RouteNameContext'
 
 type WrapperType<WTProps> = (
   props: WTProps & { children: ReactNode }
