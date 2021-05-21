@@ -464,6 +464,32 @@ test('renders first matching route only', async () => {
   expect(screen.queryByText(/param/)).not.toBeInTheDocument()
 })
 
+test('renders first matching route only with auth', async () => {
+  const ParamPage = ({ param }: { param: string }) => (
+    <div>param {param}</div>
+  )
+
+  const TestRouter = () => (
+    <Router useAuth={mockUseAuth()}>
+      <Route path="/" page={HomePage} name="home" />
+      <Route path="/login" page={LoginPage} name="login" />
+      <Route path="/about" page={AboutPage} name="about" />
+      <Private unauthenticated="login">
+        <Route path="/{param}" page={ParamPage} name="param" />
+      </Private>
+    </Router>
+  )
+
+  const screen = render(<TestRouter />)
+
+  await waitFor(() => screen.getByText(/Home Page/))
+
+  // go to about page, and make sure that's the only page rendered
+  act(() => navigate(routes.about()))
+  await waitFor(() => screen.getByText('About Page'))
+  expect(screen.queryByText(/param/)).not.toBeInTheDocument()
+})
+
 test('params should never be an empty object', async (done) => {
   const ParamPage = () => {
     const params = useParams()

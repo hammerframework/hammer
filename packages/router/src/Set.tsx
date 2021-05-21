@@ -1,10 +1,10 @@
 import React, { ReactElement, ReactNode, useCallback } from 'react'
 
 import { Redirect } from './links'
-import { useLocation } from './location'
 import { useRouterState } from './router-context'
 import { isRoute } from './router'
-import { flattenAll, matchPath } from './util'
+import { flattenAll } from './util'
+import { useRouteName } from './RouteNameContext'
 
 type WrapperType<WTProps> = (
   props: WTProps & { children: ReactNode }
@@ -46,7 +46,7 @@ export function Set<WrapperProps>(props: SetProps<WrapperProps>) {
     ...rest
   } = props
   const routerState = useRouterState()
-  const location = useLocation()
+  const { routeName } = useRouteName()
   const { loading, isAuthenticated, hasRole } = routerState.useAuth()
 
   if (privateSet && !unauthenticated) {
@@ -67,10 +67,11 @@ export function Set<WrapperProps>(props: SetProps<WrapperProps>) {
     .filter((r) => typeof r.props.path !== 'undefined')
 
   for (const route of routes) {
-    const path = route.props.path as string
+    const name = route.props.name as string
 
-    const { match } = matchPath(path, location.pathname, routerState.paramTypes)
-    if (!match) {
+    if (name !== routeName) {
+      // routeName is the name of the route we should render (routeName is
+      // set by RouteScanner)
       continue
     }
 
