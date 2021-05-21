@@ -31,15 +31,21 @@ function createDummyAuthContextValues(partial: Partial<AuthContextInterface>) {
   return { ...authContextValues, ...partial }
 }
 
-const mockUseAuth = (
-  {
-    isAuthenticated = false,
-    loading = false,
-  }: { isAuthenticated?: boolean; loading?: boolean } = {
-    isAuthenticated: false,
-    loading: false,
-  }
-) => () => createDummyAuthContextValues({ loading, isAuthenticated })
+interface MockUseAuth {
+  isAuthenticated?: boolean
+  loading?: boolean
+}
+
+const mockUseAuthDefaults = {
+  isAuthenticated: false,
+  loading: false,
+}
+
+const mockUseAuth = ({
+  isAuthenticated = false,
+  loading = false,
+}: MockUseAuth = mockUseAuthDefaults) => () =>
+  createDummyAuthContextValues({ loading, isAuthenticated })
 
 // SETUP
 const HomePage = () => <h1>Home Page</h1>
