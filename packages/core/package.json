@@ -45,7 +45,7 @@
     "babel-plugin-module-resolver": "4.1.0",
     "copy-webpack-plugin": "^6.1.0",
     "core-js": "3.12.1",
-    "css-loader": "^4.2.2",
+    "css-loader": "^5.2.5",
     "css-minimizer-webpack-plugin": "^1.2.0",
     "dotenv-webpack": "^2.0.0",
     "error-overlay-webpack-plugin": "^0.4.1",
