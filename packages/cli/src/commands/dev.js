@@ -92,7 +92,7 @@ export const handler = async ({
     },
     web: {
       name: 'web',
-      command: `cd "${rwjsPaths.web.base}" && yarn cross-env NODE_ENV=development webpack-dev-server --config ../node_modules/@redwoodjs/core/config/webpack.development.js ${forward}`,
+      command: `cd "${rwjsPaths.web.base}" && yarn cross-env NODE_ENV=development webpack serve --config ../node_modules/@redwoodjs/core/config/webpack.development.js ${forward}`,
       prefixColor: 'blue',
       runWhen: () => fs.existsSync(rwjsPaths.web.src),
     },

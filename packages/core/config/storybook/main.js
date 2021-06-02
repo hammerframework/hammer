@@ -11,6 +11,10 @@ const baseConfig = {
   addons: [
      config.web.a11y && '@storybook/addon-a11y'
   ].filter(Boolean),
+  // https://storybook.js.org/blog/storybook-for-webpack-5/
+  core: {
+    builder: "webpack5",
+  },
   webpackFinal: (sbConfig, { configType }) => {
     // configType is 'PRODUCTION' or 'DEVELOPMENT', why shout?
     const isEnvProduction = configType && configType.toLowerCase() === 'production'
