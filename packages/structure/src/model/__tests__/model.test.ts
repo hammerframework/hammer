@@ -80,7 +80,7 @@ describe('Cells', () => {
     expect(cell.queryOperationName).toMatch('TodoListCell_GetTodos')
   })
 
-  it('Warns you when you do not supply a name to QUERY', async (done) => {
+  it('Warns you when you do not supply a name to QUERY', async () => {
     const projectRoot = getFixtureDir('example-todo-main-with-errors')
     const project = new RWProject({ projectRoot, host: new DefaultHost() })
 
@@ -89,7 +89,6 @@ describe('Cells', () => {
     expect(x.map((e) => e.diagnostic.message)).toContain(
       'We recommend that you name your query operation'
     )
-    done()
   })
 })
 
