@@ -2,8 +2,15 @@
   "name": "api",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "ts-node": "ts-node --compiler-options '{\"module\":\"CommonJS\"}'"
+  },
   "dependencies": {
     "@redwoodjs/api": "^0.32.2",
     "@redwoodjs/api-server": "^0.32.2"
+  },
+  "devDependencies": {
+    "@types/node": "^15.3.0",
+    "ts-node": "^9.1.1"
   }
 }

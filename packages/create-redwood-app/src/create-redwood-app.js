@@ -130,6 +130,23 @@ const installNodeModulesTasks = ({ newAppDir }) => {
       },
     },
     {
+      title: 'Creating Prisma seed file',
+
+      task: () => {
+        const extension = typescript ? 'ts' : 'js'
+
+        const seedFile = path.join(newAppDir, `api/db/seed.${extension}`)
+
+        return fs.writeFileSync(
+          seedFile,
+          fs.readFileSync(
+            path.resolve(__dirname, 'templates', `seed.${extension}.template`),
+            { encoding: 'utf-8' }
+          )
+        )
+      },
+    },
+    {
       title: "Running 'yarn install'... (This could take a while)",
       skip: () => {
         if (yarnInstall === false) {

@@ -1,8 +1,8 @@
-/* eslint-disable no-console */
-const { PrismaClient } = require('@prisma/client')
-const dotenv = require('dotenv')
+import { PrismaClient } from '@prisma/client'
+import dotenv from 'dotenv'
 
 dotenv.config()
+
 const db = new PrismaClient()
 
 /*
@@ -28,7 +28,7 @@ async function main() {
   // // @see: https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#createmany
   // return Promise.all(
   //   data.map(async (user) => {
-  //     const record = await db.user.create({
+  //     const record = await db.userExample.create({
   //       data: { name: user.name, email: user.email },
   //     })
   //     console.log(record)
