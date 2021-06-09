@@ -2,6 +2,7 @@ import { execSync } from 'child_process'
 
 import camelcase from 'camelcase'
 import Listr from 'listr'
+import { paramCase } from 'param-case'
 import pascalcase from 'pascalcase'
 
 import { getConfig } from '@redwoodjs/internal'
@@ -14,6 +15,8 @@ import {
   createYargsForComponentGeneration,
   pathName,
   templateForComponentFile,
+  splitPathAndName,
+  formatParamPath,
 } from '../helpers'
 
 const COMPONENT_SUFFIX = 'Page'
@@ -108,6 +111,19 @@ export const files = ({ name, tests, stories, typescript, ...rest }) => {
 }
 
 export const routes = ({ name, path }) => {
+  // handle path in the name args includes path
+  if (name && name.includes('/')) {
+    const { name: splittedName, path: splittedPath } = splitPathAndName(name)
+    return [
+      `<Route path="/${formatParamPath(splittedPath)}${paramCase(
+        splittedName
+      )}" page={${camelcase(pascalcase(splittedPath))}${pascalcase(
+        splittedName
+      )}Page} name="${camelcase(pascalcase(splittedPath))}${pascalcase(
+        splittedName
+      )}" />`,
+    ]
+  }
   return [
     `<Route path="${path}" page={${pascalcase(name)}Page} name="${camelcase(
       name
@@ -124,12 +140,15 @@ const positionalsObj = {
 
 // @NOTE: Not exporting handler from function
 // As pages need a special handler
-export const { command, description, builder } =
-  createYargsForComponentGeneration({
-    componentName: 'page',
-    filesFn: files,
-    positionalsObj,
-  })
+export const {
+  command,
+  description,
+  builder,
+} = createYargsForComponentGeneration({
+  componentName: 'page',
+  filesFn: files,
+  positionalsObj,
+})
 
 export const handler = async ({
   name,

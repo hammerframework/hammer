@@ -1,5 +1,6 @@
 import path from 'path'
 
+import camelcase from 'camelcase'
 import Listr from 'listr'
 import { paramCase } from 'param-case'
 import pascalcase from 'pascalcase'
@@ -20,7 +21,7 @@ import { yargsDefaults } from '../generate'
 // TODO: Make this read all the files in a template directory instead of
 // manually passing in each file.
 export const templateForComponentFile = ({
-  name,
+  name: pathSlashName,
   suffix = '',
   extension = '.js',
   webPathSection,
@@ -31,6 +32,23 @@ export const templateForComponentFile = ({
   componentName,
   outputPath,
 }) => {
+  const { name, path: componentPath = '' } = splitPathAndName(pathSlashName)
+
+  let routeName = ''
+
+  if (pathSlashName && pathSlashName.includes(`/`)) {
+    const { name: splittedName, path: splittedPath } = splitPathAndName(
+      pathSlashName
+    )
+    if (splittedPath !== '') {
+      routeName = camelcase(pascalcase(splittedPath)) + pascalcase(splittedName)
+    }
+  } else {
+    routeName = camelcase(pathSlashName)
+  }
+
+  const camelComponentPath = formatCamelPath(componentPath)
+
   const basePath = webPathSection
     ? getPaths().web[webPathSection]
     : getPaths().api[apiPathSection]
@@ -38,7 +56,12 @@ export const templateForComponentFile = ({
     componentName || pascalcase(paramCase(name)) + suffix
   const componentOutputPath =
     outputPath ||
-    path.join(basePath, outputComponentName, outputComponentName + extension)
+    path.join(
+      basePath,
+      camelComponentPath,
+      outputComponentName,
+      outputComponentName + extension
+    )
   const fullTemplatePath = path.join(generator, 'templates', templatePath)
   const content = generateTemplate(fullTemplatePath, {
     name,
@@ -46,6 +69,7 @@ export const templateForComponentFile = ({
       `./${path.relative(getPaths().base, componentOutputPath)}`
     ),
     ...templateVars,
+    routeName: templatePath === 'page.tsx.template' ? routeName : '',
   })
   return [componentOutputPath, content]
 }
@@ -58,12 +82,17 @@ export const templateForComponentFile = ({
 export const pathName = (path, name) => {
   let routePath = path
 
-  if (path && path.startsWith('{') && path.endsWith('}')) {
-    routePath = `/${paramCase(name)}/${path}`
-  }
+  if (name && name.includes('/')) {
+    const { _name, path: splittedPath } = splitPathAndName(name)
+    routePath = `/${formatParamPath(splittedPath)}${paramCase(name)}`
+  } else {
+    if (path && path.startsWith('{') && path.endsWith('}')) {
+      routePath = `/${paramCase(name)}/${path}`
+    }
 
-  if (!routePath) {
-    routePath = `/${paramCase(name)}`
+    if (!routePath) {
+      routePath = `/${paramCase(name)}`
+    }
   }
 
   return routePath
@@ -192,3 +221,26 @@ export const forcePluralizeWord = (word) => {
 
   return pluralize.plural(word)
 }
+
+// Splits Path and Name or Model from the command argument <path/name>
+export const splitPathAndName = (pathSlashName) => {
+  const path = pathSlashName.split('/').slice(0, -1).join('/') ?? ''
+  // This code will work whether or not there's a path in the name
+  // E.g. if the name is just 'post',
+  // path.split('/') will return ['post'].
+  const name = pathSlashName.split('/').pop()
+
+  return { name, path }
+}
+
+// Format path to camelCase
+export const formatCamelPath = (path) =>
+  path === '' ? path : path.split('/').map(camelcase).join('/') + '/'
+
+// Format path to paramCase
+export const formatParamPath = (path) =>
+  path === '' ? path : path.split('/').map(paramCase).join('/') + '/'
+
+// Format path to pascalCase
+export const formatPascalPath = (path) =>
+  path === '' ? path : path.split('/').map(pascalcase).join('/') + '/'

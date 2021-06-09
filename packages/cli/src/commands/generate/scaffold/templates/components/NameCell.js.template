@@ -1,4 +1,4 @@
-import ${singularPascalName} from 'src/components/${pascalScaffoldPath}${singularPascalName}'
+import ${singularPascalName} from 'src/components/${scaffoldPathCamel}${singularPascalName}'
 
 export const QUERY = gql`
   query Find${singularPascalName}ById($id: ${idType}!) {

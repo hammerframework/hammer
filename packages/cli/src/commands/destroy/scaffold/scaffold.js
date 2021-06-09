@@ -11,10 +11,10 @@ import {
 } from 'src/lib'
 import c from 'src/lib/colors'
 
+import { splitPathAndName } from '../../generate/helpers'
 import {
   files,
   routes as scaffoldRoutes,
-  splitPathAndModel,
 } from '../../generate/scaffold/scaffold'
 
 export const command = 'scaffold <model>'
@@ -103,9 +103,9 @@ export const tasks = ({ model, path }) =>
   )
 
 export const handler = async ({ model: modelArg }) => {
-  const { model, path } = splitPathAndModel(modelArg)
+  const { name, path } = splitPathAndName(modelArg)
 
-  const t = tasks({ model, path })
+  const t = tasks({ model: name, path })
   try {
     await t.run()
   } catch (e) {

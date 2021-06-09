@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs, { rmdirSync } from 'fs'
 import https from 'https'
 import path from 'path'
 
@@ -371,23 +371,38 @@ export const cleanupEmptyDirsTask = (files) => {
   const { base } = getPaths()
   const allDirs = Object.keys(files).map((file) => path.dirname(file))
   const uniqueDirs = [...new Set(allDirs)]
-  return new Listr(
-    uniqueDirs.map((dir) => {
-      return {
-        title: `Removing empty \`./${path.relative(base, dir)}\`...`,
-        task: () => fs.rmdirSync(dir),
-        skip: () => {
-          if (!fs.existsSync(dir)) {
-            return `Doesn't exist`
-          }
-          if (fs.readdirSync(dir).length > 0) {
-            return 'Not empty'
-          }
-          return false
-        },
-      }
-    })
-  )
+  const removeComponentDir = uniqueDirs.map((dir) => {
+    return {
+      title: `Removing all parents directories from \`./${path.relative(
+        base,
+        dir
+      )}\`...`,
+      /**
+       * Remove recursively every parents folders
+       */
+      task: () => {
+        let parentDir = dir
+        while (
+          fs.existsSync(parentDir) &&
+          fs.readdirSync(parentDir).length === 0
+        ) {
+          rmdirSync(parentDir)
+          parentDir = path.resolve(parentDir, '..')
+        }
+      },
+      skip: () => {
+        if (!fs.existsSync(dir)) {
+          return `Doesn't exist`
+        }
+        if (fs.readdirSync(dir).length > 0) {
+          return 'Not empty'
+        }
+        return false
+      },
+    }
+  })
+
+  return new Listr([...removeComponentDir])
 }
 
 const wrapWithSet = (routesContent, layout, routes, newLineAndIndent) => {

@@ -2,7 +2,7 @@ import { useMutation } from '@redwoodjs/web'
 import { toast } from '@redwoodjs/web/toast'
 import { Link, routes, navigate } from '@redwoodjs/router'
 
-import { QUERY } from 'src/components/${pascalScaffoldPath}${pluralPascalName}Cell'
+import { QUERY } from 'src/components/${scaffoldPathCamel}${pluralPascalName}Cell'
 
 const DELETE_${singularConstantName}_MUTATION = gql`
   mutation Delete${singularPascalName}Mutation($id: ${idType}!) {

@@ -10,6 +10,7 @@ import {
   createYargsForComponentGeneration,
   forcePluralizeWord,
   isWordNonPluralizable,
+  splitPathAndName,
 } from '../helpers'
 
 const COMPONENT_SUFFIX = 'Cell'
@@ -26,22 +27,27 @@ const getCellOperationNames = async () => {
 }
 
 const uniqueOperationName = async (name, { index = 1, list = false }) => {
+  const { name: splittedName } = splitPathAndName(name)
+
   let operationName = pascalcase(
-    index <= 1 ? `find_${name}_query` : `find_${name}_query_${index}`
+    index <= 1
+      ? `find_${splittedName}_query`
+      : `find_${splittedName}_query_${index}`
   )
 
   if (list) {
     operationName =
       index <= 1
-        ? `${pascalcase(name)}Query`
-        : `${pascalcase(name)}Query_${index}`
+        ? `${pascalcase(splittedName)}Query`
+        : `${pascalcase(splittedName)}Query_${index}`
   }
 
   const cellOperationNames = await getCellOperationNames()
   if (!cellOperationNames.includes(operationName)) {
     return operationName
   }
-  return uniqueOperationName(name, { index: index + 1 })
+
+  return uniqueOperationName(splittedName, { index: index + 1 })
 }
 
 const getIdType = (model) => {
@@ -155,18 +161,22 @@ export const files = async ({
   }, {})
 }
 
-export const { command, description, builder, handler } =
-  createYargsForComponentGeneration({
-    componentName: 'cell',
-    filesFn: files,
-    optionsObj: {
-      ...yargsDefaults,
-      list: {
-        alias: 'l',
-        default: false,
-        description:
-          'Use when you want to generate a cell for a list of the model name.',
-        type: 'boolean',
-      },
+export const {
+  command,
+  description,
+  builder,
+  handler,
+} = createYargsForComponentGeneration({
+  componentName: 'cell',
+  filesFn: files,
+  optionsObj: {
+    ...yargsDefaults,
+    list: {
+      alias: 'l',
+      default: false,
+      description:
+        'Use when you want to generate a cell for a list of the model name.',
+      type: 'boolean',
     },
-  })
+  },
+})

@@ -1,0 +1,191 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`creates a cell component with a multi word name 1`] = `
+"export const QUERY = gql\`
+  query UserProfileQuery {
+    userProfile {
+      id
+    }
+  }
+\`
+
+export const Loading = () => <div>Loading...</div>
+
+export const Empty = () => <div>Empty</div>
+
+export const Failure = ({ error }) => (
+  <div style={{ color: 'red' }}>Error: {error.message}</div>
+)
+
+export const Success = ({ userProfile }) => {
+  return <div>{JSON.stringify(userProfile)}</div>
+}
+"
+`;
+
+exports[`creates a cell component with a single word name 1`] = `
+"export const QUERY = gql\`
+  query UserQuery {
+    user {
+      id
+    }
+  }
+\`
+
+export const Loading = () => <div>Loading...</div>
+
+export const Empty = () => <div>Empty</div>
+
+export const Failure = ({ error }) => (
+  <div style={{ color: 'red' }}>Error: {error.message}</div>
+)
+
+export const Success = ({ user }) => {
+  return <div>{JSON.stringify(user)}</div>
+}
+"
+`;
+
+exports[`creates a cell mock with a multi word name 1`] = `
+"// Define your own mock data here:
+export const standard = (/* vars, { ctx, req } */) => ({
+  userProfile: {
+    id: 42,
+  },
+})
+"
+`;
+
+exports[`creates a cell mock with a single word name 1`] = `
+"// Define your own mock data here:
+export const standard = (/* vars, { ctx, req } */) => ({
+  user: {
+    id: 42,
+  },
+})
+"
+`;
+
+exports[`creates a cell stories with a multi word name 1`] = `
+"import { Loading, Empty, Failure, Success } from './UserProfileCell'
+import { standard } from './UserProfileCell.mock'
+
+export const loading = () => {
+  return Loading ? <Loading /> : null
+}
+
+export const empty = () => {
+  return Empty ? <Empty /> : null
+}
+
+export const failure = () => {
+  return Failure ? <Failure error={new Error('Oh no')} /> : null
+}
+
+export const success = () => {
+  return Success ? <Success {...standard()} /> : null
+}
+
+export default { title: 'Cells/UserProfileCell' }
+"
+`;
+
+exports[`creates a cell stories with a single word name 1`] = `
+"import { Loading, Empty, Failure, Success } from './UserCell'
+import { standard } from './UserCell.mock'
+
+export const loading = () => {
+  return Loading ? <Loading /> : null
+}
+
+export const empty = () => {
+  return Empty ? <Empty /> : null
+}
+
+export const failure = () => {
+  return Failure ? <Failure error={new Error('Oh no')} /> : null
+}
+
+export const success = () => {
+  return Success ? <Success {...standard()} /> : null
+}
+
+export default { title: 'Cells/UserCell' }
+"
+`;
+
+exports[`creates a cell test with a multi word name 1`] = `
+"import { render, screen } from '@redwoodjs/testing'
+import { Loading, Empty, Failure, Success } from './UserProfileCell'
+import { standard } from './UserProfileCell.mock'
+
+describe('UserProfileCell', () => {
+  it('renders Loading successfully', () => {
+    expect(() => {
+      render(<Loading />)
+    }).not.toThrow()
+  })
+
+  it('renders Empty successfully', async () => {
+    expect(() => {
+      render(<Empty />)
+    }).not.toThrow()
+  })
+
+  it('renders Failure successfully', async () => {
+    expect(() => {
+      render(<Failure error={new Error('Oh no')} />)
+    }).not.toThrow()
+  })
+
+  // When you're ready to test the actual output of your component render
+  // you could test that, for example, certain text is present:
+  //
+  //   expect(screen.getByText('Hello, world')).toBeInTheDocument()
+
+  it('renders Success successfully', async () => {
+    expect(() => {
+      render(<Success userProfile={standard().userProfile} />)
+    }).not.toThrow()
+  })
+})
+"
+`;
+
+exports[`creates a cell test with a single word name 1`] = `
+"import { render, screen } from '@redwoodjs/testing'
+import { Loading, Empty, Failure, Success } from './UserCell'
+import { standard } from './UserCell.mock'
+
+describe('UserCell', () => {
+  it('renders Loading successfully', () => {
+    expect(() => {
+      render(<Loading />)
+    }).not.toThrow()
+  })
+
+  it('renders Empty successfully', async () => {
+    expect(() => {
+      render(<Empty />)
+    }).not.toThrow()
+  })
+
+  it('renders Failure successfully', async () => {
+    expect(() => {
+      render(<Failure error={new Error('Oh no')} />)
+    }).not.toThrow()
+  })
+
+  // When you're ready to test the actual output of your component render
+  // you could test that, for example, certain text is present:
+  //
+  //   expect(screen.getByText('Hello, world')).toBeInTheDocument()
+
+  it('renders Success successfully', async () => {
+    expect(() => {
+      render(<Success user={standard().user} />)
+    }).not.toThrow()
+  })
+})
+"
+`;
