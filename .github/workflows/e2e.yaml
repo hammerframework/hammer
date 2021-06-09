@@ -9,7 +9,7 @@ jobs:
     if: github.repository == 'redwoodjs/redwood'
     strategy:
       matrix:
-        os: ['ubuntu-latest']
+        os: ['windows-latest']
         node-version: ['14']
       fail-fast: true
     runs-on: ${{ matrix.os }}
@@ -28,17 +28,22 @@ jobs:
 
       - name: Create a temporary directory
         id: createpath
+        shell: bash
         run: |
           project_path=$(mktemp -d -t redwood.XXXXXX)
           echo "::set-output name=project_path::$project_path"
 
       - name: Create a RedwoodJS app
+        shell: bash
         run: ./tasks/run-e2e ${{ steps.createpath.outputs.project_path }} --no-start
 
       - name: Start server in background
-        run: yarn rw dev &
-        working-directory: ${{ steps.createpath.outputs.project_path }}
-
+        shell: bash
+        run: |
+          echo "${{ steps.createpath.outputs.project_path }}"
+          cd "${{ steps.createpath.outputs.project_path }}"
+          ls -la
+          yarn rw dev &
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
