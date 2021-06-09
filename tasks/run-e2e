@@ -6,6 +6,8 @@ const path = require('path')
 
 const execa = require('execa')
 const fs = require('fs-extra')
+const kill = require('tree-kill');
+const waitOn = require('wait-on')
 const yargs = require('yargs')
 
 // This script sets up a blank RedwoodJS app into a directory.
@@ -127,12 +129,16 @@ const convertProjectToJavaScript = () => {
   }
 }
 
-const runDevServerInBackground = () => {
+const runDevServerInBackground = async (subprocesses) => {
   console.log('Starting RedwoodJS dev server...')
-  execa.sync('yarn rw dev --fwd="--open=false" &', {
+  subprocesses.push(execa('yarn rw dev --fwd="--open=false"', {
     cwd: REDWOOD_PROJECT_DIRECTORY,
     shell: true,
     stdio: 'inherit',
+  }))
+
+  await waitOn({
+    resources: ['http://localhost:8910', 'http://localhost:8911'],
   })
 }
 
@@ -190,6 +196,8 @@ console.log('-'.repeat(80))
 
 let { copyFramework, createProject, typescript, autoStart } = args
 
+const subprocesses = []
+
 const tasks = [
   copyFramework && buildRedwoodJSFramework,
   createProject && createRedwoodJSApp,
@@ -202,9 +210,15 @@ const tasks = [
   autoStart && runCypress,
 ].filter(Boolean)
 
-for (const task of tasks) {
-  console.log()
-  task()
-  console.log()
-  console.log('-'.repeat(80))
-}
+;(async () => {
+  for (const task of tasks) {
+    console.log()
+    await task(subprocesses)
+    console.log()
+    console.log('-'.repeat(80))
+  }
+
+  for (const subprocess of subprocesses) {
+    kill(subprocess.pid)
+  }
+})()
