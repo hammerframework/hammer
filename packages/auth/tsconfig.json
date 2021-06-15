@@ -6,9 +6,10 @@
     "rootDir": "src",
     "outDir": "dist",
     "paths": {
-      "src/*": ["./src/*"]
+      "src/*": ["./src/*"],
+      "@redwoodjs/history": ["../history"]
     }
   },
   "include": ["src"],
-  "references": [{ "path": "../history" }]
+  "references": [{ "path": "../history/tsconfig.json" }]
 }

@@ -6,7 +6,8 @@
     "rootDir": "src",
     "outDir": "dist",
     "paths": {
-      "src/*": ["./src/*"]
+      "src/*": ["./src/*"],
+      "@redwoodjs/history": ["../history"]
     }
   },
   "include": ["src", "./global.d.ts"],
