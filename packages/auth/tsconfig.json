@@ -7,7 +7,6 @@
     "outDir": "dist",
     "paths": {
       "src/*": ["./src/*"],
-      "@redwoodjs/history": ["../history"]
     }
   },
   "include": ["src"],

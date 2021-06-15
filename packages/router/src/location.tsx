@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 
-import { useHistory } from '@redwoodjs/history'
+import { useHistory, gHistory } from '@redwoodjs/history'
 
-import { createNamedContext, gHistory } from './internal'
+import { createNamedContext } from './internal'
 
 export interface LocationContextType {
   pathname: string

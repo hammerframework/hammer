@@ -1,6 +1,8 @@
 import { render } from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
 
+import { HistoryProvider } from '@redwoodjs/history'
+
 import { LocationProvider, useLocation } from '../location'
 
 describe('useLocation', () => {
@@ -24,9 +26,11 @@ describe('useLocation', () => {
     }
 
     const { getByText, getByTestId } = render(
-      <LocationProvider location={mockLocation}>
-        <TestComponent />
-      </LocationProvider>
+      <HistoryProvider>
+        <LocationProvider location={mockLocation}>
+          <TestComponent />
+        </LocationProvider>
+      </HistoryProvider>
     )
 
     expect(

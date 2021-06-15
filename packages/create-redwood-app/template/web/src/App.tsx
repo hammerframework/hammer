@@ -1,4 +1,4 @@
-import { HistoryProvider } from '@redwoodjs/history'
+import '@redwoodjs/history'
 import { FatalErrorBoundary, RedwoodProvider } from '@redwoodjs/web'
 import { RedwoodApolloProvider } from '@redwoodjs/web/apollo'
 
@@ -10,11 +10,9 @@ import './index.css'
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
     <RedwoodProvider>
-      <HistoryProvider>
-        <RedwoodApolloProvider>
-          <Routes />
-        </RedwoodApolloProvider>
-      </HistoryProvider>
+      <RedwoodApolloProvider>
+        <Routes />
+      </RedwoodApolloProvider>
     </RedwoodProvider>
   </FatalErrorBoundary>
 )

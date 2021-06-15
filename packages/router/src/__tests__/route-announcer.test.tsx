@@ -1,8 +1,21 @@
 import { render, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
 
-import { Router, Route, navigate, routes, getAnnouncement } from '../internal'
+import { HistoryProvider, navigate } from '@redwoodjs/history'
+
+import {
+  Router as RedwoodRouter,
+  Route,
+  routes,
+  getAnnouncement,
+} from '../internal'
 import RouteAnnouncement from '../route-announcement'
+
+const Router = ({ children }) => (
+  <HistoryProvider>
+    <RedwoodRouter>{children}</RedwoodRouter>
+  </HistoryProvider>
+)
 
 // SETUP
 const HomePage = () => <h1>Home Page</h1>

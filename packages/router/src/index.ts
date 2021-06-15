@@ -13,7 +13,7 @@ export {
   useParams,
   useLocation,
   LocationProvider,
-  navigate,
+  // navigate,
   PageLoadingContext,
 } from './internal'
 
@@ -44,3 +44,5 @@ export interface AvailableRoutes {
 }
 
 export { SkipNavLink, SkipNavContent } from '@reach/skip-nav'
+
+export { navigate } from '@redwoodjs/history'

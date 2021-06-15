@@ -4,14 +4,13 @@ import { render, waitFor, act, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
 
 import { AuthContextInterface } from '@redwoodjs/auth'
-import { HistoryProvider } from '@redwoodjs/history'
+import { HistoryProvider, navigate } from '@redwoodjs/history'
 
 import {
-  Router as RealRouter,
+  Router as RedwoodRouter,
   Route,
   Private,
   Redirect,
-  navigate,
   routes,
   Link,
 } from '../'
@@ -53,13 +52,13 @@ const mockUseAuth =
     createDummyAuthContextValues({ loading, isAuthenticated })
 
 interface RouterProps {
-  useAuth?: AuthContextInterface
+  useAuth?: () => AuthContextInterface
   children: React.ReactNode
 }
 
 const Router = ({ useAuth, children }: RouterProps) => (
   <HistoryProvider>
-    <RealRouter useAuth={useAuth}>{children}</RealRouter>
+    <RedwoodRouter useAuth={useAuth}>{children}</RedwoodRouter>
   </HistoryProvider>
 )
 

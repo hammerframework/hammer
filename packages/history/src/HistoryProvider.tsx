@@ -15,6 +15,7 @@ interface Props {
 }
 
 export const HistoryProvider: React.FC<Props> = ({ children }) => {
+  // TODO: useRef instead?
   const [listeners, setListeners] = useState<Listener[]>([])
 
   const addListener = useCallback(
