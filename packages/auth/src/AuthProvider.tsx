@@ -1,7 +1,5 @@
 import React from 'react'
 
-import { HistoryContext } from '@redwoodjs/history'
-
 import { createAuthClient } from './authClients'
 import type {
   AuthClient,
@@ -94,7 +92,6 @@ export class AuthProvider extends React.Component<
   AuthProviderProps,
   AuthProviderState
 > {
-  static contextType = HistoryContext
   static defaultProps = {
     skipFetchCurrentUser: false,
   }
@@ -109,12 +106,11 @@ export class AuthProvider extends React.Component<
 
   rwClient: AuthClient
 
-  constructor(props: AuthProviderProps, context: typeof HistoryContext) {
-    super(props, context)
+  constructor(props: AuthProviderProps) {
+    super(props)
     this.rwClient = createAuthClient(
       props.client || (() => null),
-      props.type as SupportedAuthTypes,
-      this.context
+      props.type as SupportedAuthTypes
     )
   }
 

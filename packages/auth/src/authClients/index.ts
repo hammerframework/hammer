@@ -1,5 +1,3 @@
-import { HistoryState } from '@redwoodjs/history'
-
 import { auth0 } from './auth0'
 import type { Auth0, Auth0User } from './auth0'
 import { azureActiveDirectory } from './azureActiveDirectory'
@@ -88,7 +86,6 @@ export interface AuthClient {
 export const createAuthClient = (
   client: SupportedAuthClients,
   type: SupportedAuthTypes,
-  history: HistoryState
 ): AuthClient => {
   if (!typesToClients[type]) {
     throw new Error(
@@ -97,5 +94,5 @@ export const createAuthClient = (
       ).join(', ')}`
     )
   }
-  return typesToClients[type](client, history)
+  return typesToClients[type](client)
 }
