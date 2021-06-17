@@ -23,7 +23,6 @@ jobs:
 
       - name: Cache "node_modules"
         uses: actions/cache@v2
-        if: matrix.os == 'ubuntu-latest'
         with:
           path: '**/node_modules'
           key: node_modules_${{ runner.os }}_${{ hashFiles('**/yarn.lock') }}

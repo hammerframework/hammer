@@ -8,6 +8,7 @@
     "openMode": 0
   },
   "videoUploadOnPasses": false,
+  "video": false,
   "execTimeout": 300000,
   "pageLoadTimeout": 300000,
   "defaultCommandTimeout": 300000,

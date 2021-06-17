@@ -129,7 +129,7 @@ const convertProjectToJavaScript = () => {
 
 const runDevServerInBackground = () => {
   console.log('Starting RedwoodJS dev server...')
-  execa.sync('yarn rw dev --fwd="--open=false" &', {
+  execa.sync('yarn rw dev --no-generate --fwd="--open=false" &', {
     cwd: REDWOOD_PROJECT_DIRECTORY,
     shell: true,
     stdio: 'inherit',

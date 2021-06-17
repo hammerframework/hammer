@@ -11,7 +11,7 @@ jobs:
       matrix:
         os: ['macos-latest']
         node-version: ['14']
-      fail-fast: true
+      fail-fast: false
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} | Node ${{ matrix.node-version }} latest
     steps:
@@ -22,6 +22,12 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Cache "node_modules"
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: node_modules_${{ runner.os }}_${{ hashFiles('**/yarn.lock') }}
 
       - name: Install framework modules
         run: yarn install --frozen-lockfile
@@ -35,12 +41,11 @@ jobs:
       - name: Create a RedwoodJS app
         run: ./tasks/run-e2e ${{ steps.createpath.outputs.project_path }} --no-start
 
-      - name: Start server in background
-        run: yarn rw dev &
-        working-directory: ${{ steps.createpath.outputs.project_path }}
+      # - name: Start server in background
+      #   run: yarn rw dev --no-generate --fwd="--open=false" &
+      #   working-directory: ${{ steps.createpath.outputs.project_path }}
 
-
-      - name: Cypress run
+      - name: Cypress | tutorial, storybook, logger
         uses: cypress-io/github-action@v2
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -48,7 +53,31 @@ jobs:
           CYPRESS_RW_PATH:  "${{ steps.createpath.outputs.project_path }}"
         with:
           browser: chrome
+          headless: true
+          start: |
+            yarn --cwd ${{ steps.createpath.outputs.project_path }} rw dev --no-generate --fwd="--open=false"
           env: true
           wait-on: 'http://localhost:8910'
-          record: true
+          record: false
           working-directory: ./tasks/e2e
+          spec: |
+            cypress/integration/01-tutorial/*.spec.js
+            cypress/integration/03-storybook/*.spec.js
+            cypress/integration/04-logger/*.spec.js
+
+      - name: Cypress | CLI
+        uses: cypress-io/github-action@v2
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CYPRESS_RW_PATH:  "${{ steps.createpath.outputs.project_path }}"
+        with:
+          browser: chrome
+          headless: true
+          install: false
+          env: true
+          record: false
+          working-directory: ./tasks/e2e
+          spec: |
+            cypress/integration/02-cli/*.spec.js
+
