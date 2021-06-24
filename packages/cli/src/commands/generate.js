@@ -12,12 +12,7 @@ export const builder = (yargs) =>
     .command('types', 'Generate supplementary code', {}, () => {
       execa.sync('yarn rw-gen', { shell: true, stdio: 'inherit' })
     })
-    /**
-     * Like generate, util is an entry point command,
-     * so we can't have generate going through its subdirectories.
-     * NOTE: `util` is deprecated.
-     */
-    .commandDir('./generate', { recurse: true, exclude: /\/util\// })
+    .commandDir('./generate', { recurse: true })
     .demandCommand()
     .epilogue(
       `Also see the ${terminalLink(
