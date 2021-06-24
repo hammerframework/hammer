@@ -40,8 +40,8 @@ const ${singularPascalName}Form = (props) => {
           ${column.defaultProp}={${column.deserilizeFunction && column.deserilizeFunction + '('}props.${singularCamelName}?.<%= column.name %>${column.deserilizeFunction && ')'}}
           className="rw-input"
           errorClassName="rw-input rw-input-error"<%= !column.validation ? '' : `
-          validation=${column.validation}` %><%= !column.dataType ? '' : `
-          dataType="${column.dataType}"` %>
+          validation=${column.validation}` %><%= !column.transformValue ? '' : `
+          transformValue="${column.transformValue}"` %>
         />
         <FieldError name="${column.name}" className="rw-field-error" />
 <% }) %>

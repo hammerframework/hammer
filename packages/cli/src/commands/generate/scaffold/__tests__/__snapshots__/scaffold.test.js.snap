@@ -170,7 +170,7 @@ const PostForm = (props) => {
           className=\\"rw-input\\"
           errorClassName=\\"rw-input rw-input-error\\"
           validation={{ required: true }}
-          dataType=\\"Float\\"
+          transformValue=\\"Float\\"
         />
         <FieldError name=\\"rating\\" className=\\"rw-field-error\\" />
 
@@ -203,7 +203,7 @@ const PostForm = (props) => {
           className=\\"rw-input\\"
           errorClassName=\\"rw-input rw-input-error\\"
           validation={{ required: true }}
-          dataType=\\"Json\\"
+          transformValue=\\"Json\\"
         />
         <FieldError name=\\"metadata\\" className=\\"rw-field-error\\" />
 
@@ -1257,7 +1257,7 @@ const PostForm = (props) => {
           className=\\"rw-input\\"
           errorClassName=\\"rw-input rw-input-error\\"
           validation={{ required: true }}
-          dataType=\\"Float\\"
+          transformValue=\\"Float\\"
         />
         <FieldError name=\\"rating\\" className=\\"rw-field-error\\" />
 
@@ -1290,7 +1290,7 @@ const PostForm = (props) => {
           className=\\"rw-input\\"
           errorClassName=\\"rw-input rw-input-error\\"
           validation={{ required: true }}
-          dataType=\\"Json\\"
+          transformValue=\\"Json\\"
         />
         <FieldError name=\\"metadata\\" className=\\"rw-field-error\\" />
 

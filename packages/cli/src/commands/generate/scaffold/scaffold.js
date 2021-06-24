@@ -315,13 +315,13 @@ const componentFiles = async (
     },
     Json: {
       componentName: 'TextAreaField',
-      dataType: 'Json',
+      transformValue: 'Json',
       displayFunction: 'jsonDisplay',
       listDisplayFunction: 'jsonTruncate',
       deserilizeFunction: 'JSON.stringify',
     },
     Float: {
-      dataType: 'Float',
+      transformValue: 'Float',
     },
     default: {
       componentName: 'TextField',
@@ -330,7 +330,7 @@ const componentFiles = async (
       validation: '{{ required: true }}',
       displayFunction: undefined,
       listDisplayFunction: 'truncate',
-      dataType: undefined,
+      transformValue: undefined,
     },
   }
   const columns = model.fields
@@ -356,9 +356,9 @@ const componentFiles = async (
       displayFunction:
         componentMetadata[column.type]?.displayFunction ||
         componentMetadata.default.displayFunction,
-      dataType:
-        componentMetadata[column.type]?.dataType ||
-        componentMetadata.default.dataType,
+      transformValue:
+        componentMetadata[column.type]?.transformValue ||
+        componentMetadata.default.transformValue,
     }))
   const editableColumns = columns.filter((column) => {
     return NON_EDITABLE_COLUMNS.indexOf(column.name) === -1
