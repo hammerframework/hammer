@@ -1,1 +1,0 @@
-export { getConfig } from './getConfig'
