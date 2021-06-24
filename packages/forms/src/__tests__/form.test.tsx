@@ -222,28 +222,6 @@ describe('Form', () => {
     )
   })
 
-  it('supports "dataType" prop on input fields with deprecation warning', async () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementationOnce(() => {})
-    const mockFn = jest.fn()
-
-    render(
-      <Form onSubmit={mockFn}>
-        <TextField name="tf" defaultValue="3.14" dataType="Float" />
-        <Submit>Save</Submit>
-      </Form>
-    )
-
-    fireEvent.click(screen.getByText('Save'))
-
-    await waitFor(() => expect(console.warn).toHaveBeenCalledTimes(1))
-    expect(console.warn).toBeCalledWith(
-      'Using the "dataType" prop on form input fields is deprecated. Use "transformValue" instead.'
-    )
-    expect(mockFn).toHaveBeenCalledTimes(1)
-    expect(mockFn).toBeCalledWith({ tf: 3.14 }, expect.anything())
-    spy.mockRestore()
-  })
-
   it('handles int and float blank values gracefully with console warnings', async () => {
     const spy = jest.spyOn(console, 'warn').mockImplementation(() => {})
     const mockFn = jest.fn()

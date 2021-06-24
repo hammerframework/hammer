@@ -58,7 +58,6 @@ interface InputTagProps {
   name: string
   errorClassName?: string
   errorStyle?: React.CSSProperties
-  dataType?: TDefinedCoercionFunctions
   transformValue?: ((value: string) => any) | TDefinedCoercionFunctions
   className?: string
   style?: React.CSSProperties
@@ -71,7 +70,7 @@ interface ValidatableFieldProps extends InputTagProps {
 
 const inputTagProps = <T extends InputTagProps>(
   props: T
-): Omit<T, 'dataType' | 'transformValue' | 'errorClassName' | 'errorStyle'> => {
+): Omit<T, 'transformValue' | 'errorClassName' | 'errorStyle'> => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { errors, setError } = useFormContext()
 
@@ -92,11 +91,10 @@ const inputTagProps = <T extends InputTagProps>(
   const validationError = errors[props.name]
 
   // get errorStyle/errorClassName and replace style/className if present
-  // Also remove dataType and transformValue from tagProps
+  // Also remove transformValue from tagProps
   const {
     errorClassName,
     errorStyle,
-    dataType, // eslint-disable-line @typescript-eslint/no-unused-vars
     transformValue, // eslint-disable-line @typescript-eslint/no-unused-vars
     ...tagProps
   } = props
@@ -242,20 +240,11 @@ const TextAreaField = forwardRef<
   const { setCoercion } = useCoercion()
 
   React.useEffect(() => {
-    if (
-      props.dataType !== undefined &&
-      (process.env.NODE_ENV === 'development' ||
-        process.env.NODE_ENV === 'test')
-    ) {
-      console.warn(
-        'Using the "dataType" prop on form input fields is deprecated. Use "transformValue" instead.'
-      )
-    }
     setCoercion({
       name: props.name,
-      transformValue: props.transformValue || props.dataType,
+      transformValue: props.transformValue,
     })
-  }, [setCoercion, props.name, props.transformValue, props.dataType])
+  }, [setCoercion, props.name, props.transformValue])
 
   const tagProps = inputTagProps(props)
   // implements JSON validation if a transformValue of 'Json' is set
@@ -332,21 +321,12 @@ export const CheckboxField = forwardRef<
   const type = 'checkbox'
 
   React.useEffect(() => {
-    if (
-      props.dataType !== undefined &&
-      (process.env.NODE_ENV === 'development' ||
-        process.env.NODE_ENV === 'test')
-    ) {
-      console.warn(
-        'Using the "dataType" prop on form input fields is deprecated. Use "transformValue" instead.'
-      )
-    }
     setCoercion({
       name: props.name,
       type,
-      transformValue: props.transformValue || props.dataType,
+      transformValue: props.transformValue,
     })
-  }, [setCoercion, props.name, type, props.transformValue, props.dataType])
+  }, [setCoercion, props.name, type, props.transformValue])
 
   const tagProps = inputTagProps(props)
 
@@ -388,27 +368,12 @@ const InputField = forwardRef<
   const { register } = useFormContext()
   const { setCoercion } = useCoercion()
   React.useEffect(() => {
-    if (
-      props.dataType !== undefined &&
-      (process.env.NODE_ENV === 'development' ||
-        process.env.NODE_ENV === 'test')
-    ) {
-      console.warn(
-        'Using the "dataType" prop on form input fields is deprecated. Use "transformValue" instead.'
-      )
-    }
     setCoercion({
       name: props.name,
       type: props.type,
-      transformValue: props.transformValue || props.dataType,
+      transformValue: props.transformValue,
     })
-  }, [
-    setCoercion,
-    props.name,
-    props.type,
-    props.transformValue,
-    props.dataType,
-  ])
+  }, [setCoercion, props.name, props.type, props.transformValue])
 
   const tagProps = inputTagProps(props)
 
