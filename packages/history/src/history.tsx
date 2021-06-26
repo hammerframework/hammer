@@ -26,10 +26,18 @@ const createHistory = () => {
       }
     },
     jump: (to: string, title = '') => {
-      global.history.replaceState({}, title, to)
+      const { pathname, search, hash } = new URL(global?.location?.origin + to)
 
-      for (const listener of Object.values(listeners)) {
-        listener()
+      if (
+        global?.location?.pathname !== pathname ||
+        global?.location?.search !== search ||
+        global?.location?.hash !== hash
+      ) {
+        global.history.replaceState({}, title, to)
+
+        for (const listener of Object.values(listeners)) {
+          listener()
+        }
       }
     },
     remove: (listenerId: string) => {
