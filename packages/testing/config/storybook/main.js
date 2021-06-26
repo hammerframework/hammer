@@ -9,6 +9,9 @@ const { getConfig, getPaths } = require('@redwoodjs/internal')
 const config = getConfig()
 
 const baseConfig = {
+  core: {
+    builder: 'webpack5',
+  },
   stories: ['../../../../web/src/**/*.stories.{tsx,jsx,js}'],
   addons: [config.web.a11y && '@storybook/addon-a11y'].filter(Boolean),
   webpackFinal: (sbConfig, { configType }) => {
@@ -29,7 +32,7 @@ const baseConfig = {
       getPaths().web.routes
     sbConfig.resolve.alias['~__REDWOOD__USER_WEB_SRC'] = getPaths().web.src
 
-    // Determine the default storybook style file to use.
+    // // Determine the default storybook style file to use.
     const supportedStyleIndexFiles = ['index.scss', 'index.sass', 'index.css']
     for (let file of supportedStyleIndexFiles) {
       const filePath = path.join(getPaths().web.src, file)
