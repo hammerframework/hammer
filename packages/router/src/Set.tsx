@@ -69,7 +69,13 @@ export function Set<WrapperProps>(props: SetProps<WrapperProps>) {
   for (const route of routes) {
     const path = route.props.path as string
 
-    const { match } = matchPath(path, location.pathname, routerState.paramTypes)
+    const { match } = matchPath(
+      path,
+      location.pathname,
+      routerState.paramTypes,
+      routerState.trailingSlashes
+    )
+
     if (!match) {
       continue
     }

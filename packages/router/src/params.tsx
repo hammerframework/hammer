@@ -11,7 +11,7 @@ export interface ParamsContextProps {
 export const ParamsContext = createNamedContext<ParamsContextProps>('Params')
 
 export const ParamsProvider: React.FC = ({ children }) => {
-  const { routes, paramTypes } = useRouterState()
+  const { routes, paramTypes, trailingSlashes } = useRouterState()
   const location = useLocation()
 
   let pathParams = {}
@@ -22,7 +22,8 @@ export const ParamsProvider: React.FC = ({ children }) => {
       const { match, params } = matchPath(
         route.path,
         location.pathname,
-        paramTypes
+        paramTypes,
+        trailingSlashes
       )
 
       if (match && typeof params !== 'undefined') {

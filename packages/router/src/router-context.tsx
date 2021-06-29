@@ -4,14 +4,16 @@ import { useAuth } from '@redwoodjs/auth'
 
 import type { ParamType } from 'src/internal'
 import { isRoute, PageType } from 'src/router'
-import { flattenAll } from 'src/util'
+import { flattenAll, TrailingSlashesTypes } from 'src/util'
 
 const DEFAULT_PAGE_LOADING_DELAY = 1000 // milliseconds
+const DEFAULT_TRAILING_SLASHES = 'never'
 
 export interface RouterState {
   paramTypes?: Record<string, ParamType>
   pageLoadingDelay?: number
   useAuth: typeof useAuth
+  trailingSlashes: TrailingSlashesTypes
   routes: Array<{ name?: string; path?: string; page?: PageType }>
 }
 
@@ -25,8 +27,9 @@ const RouterSetContext =
   createContext<React.Dispatch<Partial<RouterState>> | undefined>(undefined)
 
 export interface RouterContextProviderProps
-  extends Omit<RouterState, 'useAuth' | 'routes'> {
+  extends Omit<RouterState, 'useAuth' | 'routes' | 'trailingSlashes'> {
   useAuth?: typeof useAuth
+  trailingSlashes?: TrailingSlashesTypes
 }
 
 function stateReducer(state: RouterState, newState: Partial<RouterState>) {
@@ -36,6 +39,7 @@ function stateReducer(state: RouterState, newState: Partial<RouterState>) {
 export const RouterContextProvider: React.FC<RouterContextProviderProps> = ({
   useAuth: customUseAuth,
   paramTypes,
+  trailingSlashes = DEFAULT_TRAILING_SLASHES,
   pageLoadingDelay = DEFAULT_PAGE_LOADING_DELAY,
   children,
 }) => {
@@ -49,6 +53,7 @@ export const RouterContextProvider: React.FC<RouterContextProviderProps> = ({
 
   const [state, setState] = useReducer(stateReducer, {
     useAuth: customUseAuth || useAuth,
+    trailingSlashes,
     paramTypes,
     pageLoadingDelay,
     routes,

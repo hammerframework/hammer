@@ -1,4 +1,4 @@
-import { matchPath, parseSearch, validatePath } from '../util'
+import { formatPath, matchPath, parseSearch, validatePath } from '../util'
 
 describe('matchPath', () => {
   it.each([
@@ -125,6 +125,57 @@ describe('matchPath', () => {
       params: { id: 44, version: 1.8, edit: false },
     })
   })
+
+  describe('trailingSlashes parameter', () => {
+    describe('never - Always strip trailing slashes from URLs before matching', () => {
+      it.each([
+        ['/post/', '/post/'],
+        ['/post', '/post/'],
+        ['/post/', '/post'],
+        ['/post', '/post'],
+      ])('matches route "%s" with pathname "%s"', (route, pathname) => {
+        expect(matchPath(route, pathname, undefined, 'never')).toEqual({
+          match: true,
+          params: {},
+        })
+      })
+    })
+
+    describe('always - Always add trailing slashes to URLs before matching.', () => {
+      it.each([
+        ['/post/', '/post/'],
+        ['/post', '/post/'],
+        ['/post/', '/post'],
+        ['/post', '/post'],
+      ])('matches route "%s" with pathname "%s"', (route, pathname) => {
+        expect(matchPath(route, pathname, undefined, 'always')).toEqual({
+          match: true,
+          params: {},
+        })
+      })
+    })
+
+    describe('preserve - Keep trailing slashes as-is before matching', () => {
+      it.each([
+        ['/post/', '/post'],
+        ['/post', '/post/'],
+      ])('does not match route "%s" with pathname "%s"', (route, pathname) => {
+        expect(matchPath(route, pathname, undefined, 'preserve')).toEqual({
+          match: false,
+        })
+      })
+
+      it.each([
+        ['/post/', '/post/'],
+        ['/post', '/post'],
+      ])('does match route "%s" with pathname "%s"', (route, pathname) => {
+        expect(matchPath(route, pathname, undefined, 'preserve')).toEqual({
+          match: true,
+          params: {},
+        })
+      })
+    })
+  })
 })
 
 describe('validatePath', () => {
@@ -187,5 +238,28 @@ describe('parseSearch', () => {
     expect(
       parseSearch('?search=all+dogs+go+to+heaven&category=movies')
     ).toEqual({ category: 'movies', search: 'all dogs go to heaven' })
+  })
+})
+
+describe('formatPath', () => {
+  describe('never', () => {
+    it('strips trailing slashes', () => {
+      expect(formatPath('/post', 'never')).toEqual('/post')
+      expect(formatPath('/post/', 'never')).toEqual('/post')
+    })
+  })
+
+  describe('always', () => {
+    it('adds trailing slashes', () => {
+      expect(formatPath('/post', 'always')).toEqual('/post/')
+      expect(formatPath('/post/', 'always')).toEqual('/post/')
+    })
+  })
+
+  describe('preserve', () => {
+    it('keeps trailing slashes as-is', () => {
+      expect(formatPath('/post', 'preserve')).toEqual('/post')
+      expect(formatPath('/post/', 'preserve')).toEqual('/post/')
+    })
   })
 })

@@ -89,7 +89,8 @@ const InternalRoute: React.VFC<InternalRouteProps> = ({
   const { match, params: pathParams } = matchPath(
     path,
     location.pathname,
-    routerState.paramTypes
+    routerState.paramTypes,
+    routerState.trailingSlashes
   )
 
   if (!match) {
@@ -131,6 +132,7 @@ const Router: React.FC<RouterProps> = ({
   useAuth,
   paramTypes,
   pageLoadingDelay,
+  trailingSlashes,
   children,
 }) => {
   const flatChildArray = flattenAll(children)
@@ -161,6 +163,7 @@ const Router: React.FC<RouterProps> = ({
   return (
     <RouterContextProvider
       useAuth={useAuth}
+      trailingSlashes={trailingSlashes}
       paramTypes={paramTypes}
       pageLoadingDelay={pageLoadingDelay}
     >
@@ -236,7 +239,8 @@ const RouteScanner: React.FC = ({ children }) => {
       const { match } = matchPath(
         path,
         location.pathname,
-        routerState.paramTypes
+        routerState.paramTypes,
+        routerState.trailingSlashes
       )
 
       if (match) {

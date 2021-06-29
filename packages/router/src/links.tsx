@@ -1,6 +1,7 @@
 import { forwardRef, useEffect } from 'react'
 
 import { navigate, matchPath, useLocation } from './internal'
+import { useRouterState } from './router-context'
 
 /**
  * Returns true if the URL for the given "route" value matches the current URL.
@@ -9,11 +10,18 @@ import { navigate, matchPath, useLocation } from './internal'
  */
 const useMatch = (route: string) => {
   const location = useLocation()
+  const routerState = useRouterState()
+
   if (!location) {
     return { match: false }
   }
 
-  return matchPath(route, location.pathname)
+  return matchPath(
+    route,
+    location.pathname,
+    routerState.paramTypes,
+    routerState.trailingSlashes
+  )
 }
 
 interface LinkProps {
