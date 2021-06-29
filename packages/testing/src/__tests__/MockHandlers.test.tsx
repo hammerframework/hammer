@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import 'whatwg-fetch'
 import React, { useCallback, useState } from 'react'
 

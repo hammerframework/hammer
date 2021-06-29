@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import React from 'react'
 
 import { render, waitFor, act, fireEvent } from '@testing-library/react'
@@ -490,11 +494,10 @@ test('renders first matching route only, even if multiple routes have the same n
   expect(screen.queryByText('About Two Page')).not.toBeInTheDocument()
 })
 
-test('params should never be an empty object', async (done) => {
+test('params should never be an empty object', async () => {
   const ParamPage = () => {
     const params = useParams()
     expect(params).not.toEqual({})
-    done()
     return null
   }
 
@@ -508,7 +511,7 @@ test('params should never be an empty object', async (done) => {
   render(<TestRouter />)
 })
 
-test('params should never be an empty object in Set', async (done) => {
+test('params should never be an empty object in Set', async () => {
   const ParamPage = () => {
     return null
   }
@@ -516,7 +519,6 @@ test('params should never be an empty object in Set', async (done) => {
   const SetWithUseParams = ({ children }) => {
     const params = useParams()
     expect(params).not.toEqual({})
-    done()
     return children
   }
 
