@@ -6,10 +6,12 @@
   "files": [
     "config",
     "dist",
-    "esbuild"
+    "esbuild",
+    "babel"
   ],
   "bin": {
-    "rw-api-build": "esbuild/index.js"
+    "rw-api-esbuild": "esbuild/index.js",
+    "rw-api-babel": "babel/index.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

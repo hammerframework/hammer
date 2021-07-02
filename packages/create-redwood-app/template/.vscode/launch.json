@@ -6,17 +6,6 @@
       "name": "launch development",
       "request": "launch",
       "type": "node-terminal"
-    },
-    {
-      "type": "pwa-node",
-      "request": "launch",
-      "name": "launch api",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "cwd": "${workspaceFolder}/api",
-      "envFile": "${workspaceFolder}/.env.defaults",
-      "program": "${workspaceFolder}/node_modules/.bin/dev-server"
     }
   ]
 }

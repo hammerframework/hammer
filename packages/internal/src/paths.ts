@@ -48,6 +48,7 @@ export interface Paths {
       includes: string
       mirror: string
     }
+    prebuild: string
   }
   web: BrowserTargetPaths
   api: NodeTargetPaths
@@ -154,6 +155,7 @@ export const getPaths = (BASE_DIR: string = getBaseDir()): Paths => {
         includes: path.join(BASE_DIR, '.redwood/types/includes'),
         mirror: path.join(BASE_DIR, '.redwood/types/mirror'),
       },
+      prebuild: path.join(BASE_DIR, '.redwood/prebuild'),
     },
 
     scripts: path.join(BASE_DIR, PATH_RW_SCRIPTS),

@@ -131,11 +131,11 @@ function normalizeRequest(event: APIGatewayProxyEvent): Request {
 
 function redwoodErrorHandler(errors: Readonly<GraphQLError[]>) {
   for (const error of errors) {
-    // I want the dev-server to pick this up!?
+    // I want the api-server to pick this up!?
     // TODO: Move the error handling into a separate package
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    import('@redwoodjs/dev-server/dist/error')
+    import('@redwoodjs/api-server/dist/error')
       .then(({ handleError }) => {
         return handleError(error.originalError as Error)
       })

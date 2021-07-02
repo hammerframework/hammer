@@ -251,7 +251,6 @@ If you've made build or design time changes to RedwoodJS, that is if you have mo
 ├ api-server
 ├ cli
 ├ core
-├ dev-server
 ├ eslint-config
 ├ internal
 ├ prerender
@@ -504,7 +503,6 @@ The Redwood CLI has the following binaries:
 - `rw`
 - `redwood-tools`
 - `rwt`
-- `dev-server`
 
 When you're contributing, the permissions of these binaries can sometimes get mixed up. This makes them executable again.
 

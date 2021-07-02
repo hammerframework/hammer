@@ -22,6 +22,7 @@ jest.mock('src/lib', () => {
       base: './',
       api: {
         dbSchema: '../../__fixtures__/example-todo-main/api/prisma',
+        dist: 'my-api-dist-path/',
       },
       web: {},
     }),
@@ -62,7 +63,32 @@ test('The build command runs the correct commands.', async () => {
   )
 
   expect(execa.mock.results[1].value).toEqual(
-    `yarn cross-env NODE_ENV=production babel src --out-dir dist --delete-dir-on-start --extensions .ts,.js --ignore '**/*.test.ts,**/*.test.js,**/__tests__' --source-maps`
+    `yarn cross-env NODE_ENV=production rw-api-babel`
+  )
+
+  expect(
+    execa.mock.results[2].value.startsWith(
+      'yarn cross-env NODE_ENV=production webpack --config'
+    )
+  ).toEqual(true)
+
+  expect(execa.mock.results[2].value.endsWith('webpack.production.js')).toEqual(
+    true
+  )
+})
+
+test('The build command obeys the esbuild flag', async () => {
+  await handler({
+    esbuild: true,
+  })
+
+  // Prisma command is inserted differently
+  expect(runCommandTask.mock.results[0].value[0]).toEqual(
+    'yarn prisma generate --schema="../../__fixtures__/example-todo-main/api/prisma"'
+  )
+
+  expect(execa.mock.results[1].value).toEqual(
+    `yarn rimraf "my-api-dist-path/" && yarn cross-env NODE_ENV=production yarn rw-api-esbuild`
   )
 
   expect(

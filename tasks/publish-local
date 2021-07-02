@@ -5,7 +5,7 @@ set -e
 # registry (http://localhost:4873).
 #
 # Usage:
-# Publish a single package: ./tasks/local-publish ./packages/dev-server
+# Publish a single package: ./tasks/local-publish ./packages/api-server
 # Publish all the packages: ./tasks/local-publish
 
 if ! lsof -Pi :4873 -sTCP:LISTEN -t >/dev/null; then

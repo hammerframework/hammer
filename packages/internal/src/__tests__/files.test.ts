@@ -13,6 +13,7 @@ afterAll(() => {
 })
 
 import {
+  findApiServerFunctions,
   findCells,
   findDirectoryNamedModules,
   findGraphQLSchemas,
@@ -42,6 +43,7 @@ test('finds directory named modules', () => {
 
   expect(p).toMatchInlineSnapshot(`
     Array [
+      "api/src/functions/healthz/healthz.js",
       "api/src/services/todos/todos.js",
       "web/src/components/AddTodo/AddTodo.js",
       "web/src/components/AddTodoControl/AddTodoControl.js",
@@ -83,4 +85,16 @@ test('find the graphql schema files', () => {
 
   expect(p[0]).toMatchInlineSnapshot(`"api/src/graphql/currentUser.sdl.ts"`)
   expect(p[1]).toMatchInlineSnapshot(`"api/src/graphql/todos.sdl.js"`)
+})
+
+test('find api functions', () => {
+  const paths = findApiServerFunctions()
+  const p = paths.map(cleanPaths)
+  expect(p).toMatchInlineSnapshot(`
+    Array [
+      "api/src/functions/graphql.js",
+      "api/src/functions/healthz/healthz.js",
+      "api/src/functions/x/index.js",
+    ]
+  `)
 })

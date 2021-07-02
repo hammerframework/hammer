@@ -1,3 +1,5 @@
+import c from 'ansi-colors'
+
 import { getConfig } from '@redwoodjs/internal'
 
 import createApp from './app'
@@ -43,29 +45,36 @@ interface ApiServerArgs extends Omit<HttpServerParams, 'app'> {
   apiRootPath: string // either user supplied or '/'
 }
 
-export const apiServerHandler = ({
+export const apiServerHandler = async ({
   port,
   socket,
   apiRootPath,
 }: ApiServerArgs) => {
-  let app = createApp()
-
-  // Attach middleware
-  app = withFunctions(app, apiRootPath)
-
-  startServer({
+  const tsApiServer = Date.now()
+  process.stdout.write(c.dim(c.italic('Starting API Server... ')))
+  const app = createApp()
+  const http = startServer({
     port,
     socket,
     app,
   }).on('listening', () => {
-    if (socket) {
-      console.log(`Listening on ${socket}`)
-    }
-    console.log(`Listening on http://localhost:${port}${apiRootPath}`)
+    console.log(c.italic(c.dim('Took ' + (Date.now() - tsApiServer) + ' ms')))
+
+    const on = socket
+      ? socket
+      : c.magenta(`http://localhost:${port}${apiRootPath}`)
+    console.log(`Listening on ${on}`)
+
+    // Import Server Functions.
+    withFunctions(app, apiRootPath)
+  })
+  process.on('exit', () => {
+    http?.close()
+    process.exit(0)
   })
 }
 
-export const bothServerHandler = ({
+export const bothServerHandler = async ({
   port,
   socket,
 }: Omit<HttpServerParams, 'app'>) => {
@@ -73,7 +82,7 @@ export const bothServerHandler = ({
   let app = createApp()
 
   // Attach middleware
-  app = withFunctions(app, apiRootPath)
+  app = await withFunctions(app, apiRootPath)
   app = withWebServer(app)
 
   startServer({

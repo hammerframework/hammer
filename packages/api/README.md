@@ -86,7 +86,7 @@ For detailed logger configuration, see the RedwoodJS logger package [README](./s
 - [Apollo Server](https://www.apollographql.com/docs/apollo-server/) (Lambda)
 - [GraphQL](https://graphql.org/learn/)
 
-Although this package depends, in the code-dependency sense, only on `@redwoodjs/internals`, it still hangs together with the others&mdash;notably, `@redwoodjs/web` and `@redwoodjs/dev-server`. So if you’re asking yourself “but when does my server run?” head over to `@redwoodjs/dev-server`.
+Although this package depends, in the code-dependency sense, only on `@redwoodjs/internals`, it still hangs together with the others&mdash;notably, `@redwoodjs/web` and `@redwoodjs/api-server`. So if you’re asking yourself “but when does my server run?” head over to `@redwoodjs/api-server`.
 
 ### Overview
 

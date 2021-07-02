@@ -4,7 +4,9 @@ export const todos = () => db.todo.findMany()
 
 export const createTodo = ({ body }) => db.todo.create({ data: { body } })
 
-export const numTodos = () => 0
+export const numTodos = () => {
+  return context.currentUser
+}
 
 export const updateTodoStatus = ({ id, status }) =>
   db.todo.update({

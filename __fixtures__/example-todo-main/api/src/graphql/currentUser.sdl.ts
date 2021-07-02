@@ -3,3 +3,5 @@ export const schema = gql`
     currentUser: JSON
   }
 `
+
+const a = (x: string) => { return x }
