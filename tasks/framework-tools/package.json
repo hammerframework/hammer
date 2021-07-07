@@ -15,6 +15,8 @@
     "@babel/preset-react": "7.13.13",
     "@babel/preset-typescript": "7.13.0",
     "@babel/runtime-corejs3": "7.14.0",
+    "@changesets/changelog-github": "^0.4.0",
+    "@changesets/cli": "^2.16.0",
     "@testing-library/jest-dom": "5.11.10",
     "@testing-library/react": "11.2.7",
     "@testing-library/user-event": "13.1.9",

@@ -28,6 +28,7 @@
     "build:types": "yarn framework build:types",
     "build:clean": "yarn framework build:clean",
     "build:watch": "yarn framework build:watch",
+    "changeset": "yarn framework changeset",
     "test": "yarn framework test",
     "lint": "yarn framework lint",
     "lint:fix": "yarn framework lint:fix",
