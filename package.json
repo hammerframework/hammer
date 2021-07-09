@@ -33,7 +33,7 @@
     "lint:fix": "yarn framework lint:fix",
 
     "postinstall": "yarn framework install",
-    "build:link": "./tasks/build-and-copy",
-    "build:test-project": "./tasks/test-project/test-project"
+    "build:link": "node ./tasks/build-and-copy",
+    "build:test-project": "node ./tasks/test-project/test-project"
   }
 }
