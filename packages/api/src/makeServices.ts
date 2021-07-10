@@ -7,7 +7,6 @@ import { ServicesCollection, MakeServices, Services } from './types'
 export const makeServices: MakeServices = ({ services }) => {
   if (process.env.REDWOOD_SECURE_SERVICES !== '1') {
     console.warn('NOTICE: Redwood v1.0 will make resolvers secure by default.')
-
     console.warn(
       'To opt in to this behavior now, add `REDWOOD_SECURE_SERVICES=1` to your `.env.defaults` file. For more information: https://redwoodjs.com/docs/services'
     )
@@ -17,6 +16,15 @@ export const makeServices: MakeServices = ({ services }) => {
   const servicesCollection: ServicesCollection = {}
 
   for (const [name, resolvers] of Object.entries(services)) {
+    // if this "service" is actually from the root directory of api/src/services
+    // we don't need to check for `beforeResolver` export (it's probably an
+    // index file or other shared functionality) but we'll still add it to the
+    // collection as normal
+    if (!name.match(/_/)) {
+      servicesCollection[name] = resolvers
+      continue
+    }
+
     if (!resolvers?.beforeResolver) {
       throw new MissingBeforeResolverError(name)
     }

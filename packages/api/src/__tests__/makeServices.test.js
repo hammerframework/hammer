@@ -55,4 +55,17 @@ describe('makeServices', () => {
       'beforeResolver'
     )
   })
+
+  it('ignores services that are not in a subdirectory', () => {
+    process.env.REDWOOD_SECURE_SERVICES = '1'
+    let madeServices
+
+    expect(() => {
+      madeServices = makeServices({
+        services: { index: { foo: () => {} }, ...services },
+      })
+    }).not.toThrow()
+    // still exports those services
+    expect(Object.keys(madeServices)).toContain('index')
+  })
 })
