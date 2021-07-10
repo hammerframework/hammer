@@ -13,6 +13,7 @@
   "dependencies": {
     "@apollo/client": "3.3.19",
     "@redwoodjs/auth": "0.34.1",
+    "@redwoodjs/history": "0.34.1",
     "core-js": "3.15.2",
     "graphql": "15.5.1",
     "proptypes": "1.1.0",
