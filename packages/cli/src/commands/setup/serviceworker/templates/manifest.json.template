@@ -1,0 +1,21 @@
+{
+  "Scope": "/",
+  "author": "John Doe",
+  "contributors": ["Jane Doe"],
+  "description": "A RedwoodJS Application",
+  "display": "fullscreen",
+  "icons": [
+  {
+    "src": "favicon.png",
+    "sizes": "144x144",
+    "type": "image/png"
+  }
+],
+  "main": "index.js",
+  "manifest_version": "0.0.1",
+  "name": "RedwoodJS Application",
+  "orientation": "portrait",
+  "short_name": "RWJS App",
+  "start_url": "/",
+  "version": "0.0.1"
+}
