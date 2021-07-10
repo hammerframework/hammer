@@ -115,7 +115,6 @@ export class AuthProvider extends React.Component<
   }
 
   async componentDidMount() {
-    await this.rwClient.restoreAuthState?.()
     await this.reauthenticate()
     return this.rwClient.restoreAuthState?.()
   }
