@@ -1,0 +1,82 @@
+# Deploys Redwood API container to Cloud Run, with the static website
+# deployed to Firebase Hosting.
+steps:
+  - id: 'Install Cloud SQL proxy'
+    name: alpine:3.10
+    entrypoint: sh
+    args:
+      - -c
+      - 'wget -O /workspace/cloud_sql_proxy https://storage.googleapis.com/cloudsql-proxy/v1.16/cloud_sql_proxy.linux.386 &&  chmod +x /workspace/cloud_sql_proxy'
+
+  - id: 'Install Redwood.js dependencies for running migration'
+    name: 'node'
+    entrypoint: 'yarn'
+    dir: './'
+    args:
+      - install
+
+  - id: 'Run db migrations'
+    name: node
+    timeout: 100s
+    entrypoint: sh
+    args:
+      - -c
+      - '(/workspace/cloud_sql_proxy -dir=/workspace -instances=${project}:${region}:${dbName}:sql-inst=tcp:5432 & sleep 2) && yarn redwood db up'
+    env:
+      - DATABASE_URL=${databaseSubstitution}
+
+  - id: 'Seed the database'
+    name: node
+    timeout: 100s
+    entrypoint: sh
+    args:
+      - -c
+      - '(/workspace/cloud_sql_proxy -dir=/workspace -instances=${project}:${region}:${dbName}:sql-inst=tcp:5432 & sleep 2) && yarn redwood db seed || true'
+    env:
+      - DATABASE_URL=${databaseSubstitution}
+
+  - id: 'Build API and frontend'
+    name: 'node'
+    entrypoint: 'yarn'
+    dir: './'
+    args:
+      - redwood
+      - build
+
+  - id: 'Build API Container'
+    name: 'gcr.io/cloud-builders/gcloud'
+    dir: './'
+    args:
+      - builds
+      - submit
+      - --tag
+      - gcr.io/${project}/${containerName}
+
+  - id: 'Deploy API Container to Cloud Run'
+    name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - run
+      - deploy
+      - ${containerName}
+      - --image
+      - gcr.io/${project}/${containerName}
+      - --region
+      - ${region}
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --memory
+      - 2Gi
+      - --set-env-vars
+      - DATABASE_URL=${databaseSubstitution}
+      - --add-cloudsql-instances
+      - ${dbName}
+
+  - id: 'Deploy to firebase hosting'
+    name: 'gcr.io/oss-automation/firebase'
+    dir: './'
+    args:
+      - deploy
+      - --only=hosting
+
+timeout: '1200s'

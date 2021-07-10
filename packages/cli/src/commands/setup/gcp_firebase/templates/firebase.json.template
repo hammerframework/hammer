@@ -1,0 +1,25 @@
+{
+  "hosting": {
+    "target": "prod",
+    "public": "web/dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      <% for (let i = 0, apiRoute; (apiRoute = apiRoutes[i]) !== undefined; i++) { %>{
+        "source" : "${apiRoute}",
+        "run" : {
+          "serviceId" : "${containerName}",
+          "region": "${region}"
+        }
+      },<% } %>
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "cleanUrls": true
+  }
+}

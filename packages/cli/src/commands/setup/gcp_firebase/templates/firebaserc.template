@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "${project}"
+  },
+  "targets": {
+    "oss-automation": {
+      "hosting": {
+        "prod": [
+          "${site}"
+        ]
+      }
+    }
+  }
+}
