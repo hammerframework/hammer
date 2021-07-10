@@ -1,17 +1,33 @@
 import type { DocumentNode } from 'graphql'
 import type { A } from 'ts-toolbelt'
 
-import { useQuery } from './GraphQLHooksProvider'
+import { useQuery, useMutation } from './GraphQLHooksProvider'
 
 interface QueryProps {
   query: DocumentNode
   children: (result: QueryOperationResult) => React.ReactElement
 }
 
+interface MutationProps {
+  mutation: DocumentNode
+  children: (result: MutationOperationResult) => React.ReactElement
+}
+
+export type QueryTag = React.JSXElement
 const Query = ({ children, query, ...rest }: QueryProps) => {
   const result = useQuery(query, rest)
   return result ? children(result) : null
 }
+
+export type MutationTag = React.JSXElement
+const Mutation = ({ children, mutation, ...rest }: MutationProps) => {
+  const result = useMutation(mutation, rest)
+  return result ? children(result) : null
+}
+
+export type QueryOrMutationTag = QueryTag | MutationTag
+
+const QueryOrMutation: QueryOrMutationTag = Query || Mutation
 
 export type DataObject = { [key: string]: unknown }
 
@@ -34,6 +50,7 @@ export type CellSuccessProps<TData = any> = Partial<
 export interface CreateCellProps<CellProps> {
   beforeQuery?: <TProps>(props: TProps) => { variables: TProps }
   QUERY: DocumentNode | ((variables: Record<string, unknown>) => DocumentNode)
+  MUTATION: DocumentNode | ((variables: Record<string, unknown>) => DocumentNode)
   afterQuery?: (data: DataObject) => DataObject
   Loading?: React.FC<CellLoadingProps & Partial<CellProps>>
   Failure?: React.FC<CellFailureProps & Partial<CellProps>>
@@ -48,6 +65,7 @@ export interface CreateCellProps<CellProps> {
  * HOC via a babel-plugin.
  *
  * @param {string} QUERY - The graphQL syntax tree to execute
+ * @param {string} MUTATION - The graphQL syntax tree to execute
  * @param {function=} beforeQuery - Prepare the variables and options for the query
  * @param {function=} afterQuery - Sanitize the data return from graphQL
  * @param {Component=} Loading - Loading, render this component
@@ -101,6 +119,7 @@ export function createCell<CellProps = any>({
     notifyOnNetworkStatusChange: true,
   }),
   QUERY,
+  MUTATION,
   afterQuery = (data) => ({ ...data }),
   Loading = () => <>Loading...</>,
   Failure,
@@ -119,10 +138,13 @@ export function createCell<CellProps = any>({
       ...variables
     } = props
 
+    const isQuery = !!QUERY
+    const queryOrMutation = isQuery ? QUERY : MUTATION
+
     return (
-      <Query
+      <QueryOrMutation
         query={
-          typeof QUERY === 'function' ? QUERY(beforeQuery(variables)) : QUERY
+          typeof queryOrMutation === 'function' ? queryOrMutation(beforeQuery(variables)) : queryOrMutation
         }
         {...beforeQuery(variables)}
       >
@@ -159,7 +181,7 @@ export function createCell<CellProps = any>({
             )
           }
         }}
-      </Query>
+      </QueryOrMutation>
     )
   }
 }
