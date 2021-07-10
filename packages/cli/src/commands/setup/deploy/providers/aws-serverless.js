@@ -52,17 +52,17 @@ ${
     memorySize: 1024 # mb
     timeout: 25 # seconds (max: 29)
     tags: # Tags for this specific lambda function
-      endpoint: ${config.web.apiProxyPath}/${basename}
+      endpoint: ${config.web.apiURL}/${basename}
     # Uncomment this section to add environment variables either from the Serverless dotenv plugin or using Serverless params
     # environment:
     #   YOUR_FIRST_ENV_VARIABLE: \${env:YOUR_FIRST_ENV_VARIABLE}
     handler: ${basename}.handler
     events:
       - httpApi:
-          path: ${config.web.apiProxyPath}/${basename}
+          path: ${config.web.apiURL}/${basename}
           method: GET
       - httpApi:
-          path: ${config.web.apiProxyPath}/${basename}
+          path: ${config.web.apiURL}/${basename}
           method: POST
 `
     })

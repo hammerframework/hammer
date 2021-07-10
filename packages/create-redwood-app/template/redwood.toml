@@ -7,7 +7,8 @@
 
 [web]
   port = 8910
-  apiProxyPath = "/.redwood/functions"
+  apiURL = '/.netlify/functions'
+  apiGraphQLServerPath = '/graphql'
 [api]
   port = 8911
 [browser]

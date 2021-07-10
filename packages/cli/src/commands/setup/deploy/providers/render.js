@@ -129,7 +129,7 @@ export const files = [
   },
 ]
 
-export const apiProxyPath = '/.redwood/functions'
+export const apiURL = '/.redwood/functions'
 
 // any notes to print out when the job is done
 export const notes = [

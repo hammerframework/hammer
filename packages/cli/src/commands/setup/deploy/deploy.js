@@ -15,22 +15,19 @@ const SUPPORTED_PROVIDERS = fs
   .map((file) => path.basename(file, '.js'))
   .filter((file) => file !== 'README.md')
 
-const updateProxyPath = (newProxyPath) => {
+const updateApiURL = (apiURL) => {
   const redwoodToml = fs.readFileSync(REDWOOD_TOML_PATH).toString()
   let newRedwoodToml = redwoodToml
 
-  if (redwoodToml.match(/apiProxyPath/)) {
-    newRedwoodToml = newRedwoodToml.replace(
-      /apiProxyPath.*/g,
-      `apiProxyPath = "${newProxyPath}"`
-    )
+  if (redwoodToml.match(/apiURL/)) {
+    newRedwoodToml = newRedwoodToml.replace(/apiURL.*/g, `apiURL = "${apiURL}"`)
   } else if (redwoodToml.match(/\[web\]/)) {
     newRedwoodToml = newRedwoodToml.replace(
       /\[web\]/,
-      `[web]\n  apiProxyPath = "${newProxyPath}"`
+      `[web]\n  apiURL = "${apiURL}"`
     )
   } else {
-    newRedwoodToml += `[web]\n  apiProxyPath = "${newProxyPath}"`
+    newRedwoodToml += `[web]\n  apiURL = "${apiURL}"`
   }
 
   fs.writeFileSync(REDWOOD_TOML_PATH, newRedwoodToml)
@@ -150,10 +147,10 @@ export const handler = async ({ provider, force, database }) => {
           await execa('yarn', ['install'])
         },
       },
-      providerData?.apiProxyPath && {
-        title: 'Updating apiProxyPath...',
+      providerData?.apiURL && {
+        title: 'Updating API URL...',
         task: async () => {
-          updateProxyPath(providerData.apiProxyPath)
+          updateApiURL(providerData.apiURL)
         },
       },
       providerData?.files?.length && {

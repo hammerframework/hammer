@@ -18,7 +18,9 @@ export const getRootHtmlPath = () => {
 }
 
 export const registerShims = () => {
-  global.__REDWOOD__API_PROXY_PATH = getConfig().web.apiProxyPath
+  const rwjsConfig = getConfig()
+  global.REDWOOD_API_URL = rwjsConfig.web.apiURL
+  global.REDWOOD_API_GRAPHQL_SERVER_PATH = rwjsConfig.web.apiGraphQLServerPath
 
   global.__REDWOOD__USE_AUTH = () =>
     ({

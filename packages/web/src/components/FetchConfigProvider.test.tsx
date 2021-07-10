@@ -3,8 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react'
 import type { AuthContextInterface } from '@redwoodjs/auth'
 import '@testing-library/jest-dom/extend-expect'
 
-// @ts-expect-error Mocking api proxy path for test
-global.__REDWOOD__API_PROXY_PATH = 'https://api.example.com'
+global.REDWOOD_API_URL = 'https://api.example.com'
+global.REDWOOD_API_GRAPHQL_SERVER_PATH = '/graphql'
 
 import { FetchConfigProvider, useFetchConfig } from './FetchConfigProvider'
 

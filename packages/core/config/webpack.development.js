@@ -9,6 +9,43 @@ const webpackConfig = require('./webpack.common')
 const { mergeUserWebpackConfig } = webpackConfig
 const redwoodConfig = getConfig()
 
+const getProxyConfig = () => {
+  const { apiURL } = redwoodConfig.web
+  const { port } = redwoodConfig.api
+
+  if (apiURL.startsWith('/')) {
+    // Redwood only proxies absolute paths.
+    return {
+      [apiURL]: {
+        target: `http://[::1]:${port}`,
+        pathRewrite: {
+          // Eg: Rewrite `/.netlify/functions/graphql` to `/graphql`, which the api-server expects
+          [`^${escapeRegExp(apiURL)}`]: '',
+        },
+        headers: {
+          Connection: 'keep-alive',
+        },
+      },
+    }
+  }
+
+  if (apiURL.includes('://')) {
+    // A developer may want to point their development environment to a staging or production GraphQL server.
+    // They have specified an absolute URI,
+    // which would contain `://`, `http://`, or `https://`
+    //
+    // So don't proxy anything.
+    return undefined
+  }
+
+  console.error('Error: `apiURL` is configured incorrectly.')
+  console.error(
+    'It should be an absolute path (thats starts with `/`) or an absolute URI that starts with `http[s]://`'
+  )
+  process.exit(1)
+}
+
+/** @type {import('webpack').Configuration} */
 const baseConfig = merge(webpackConfig('development'), {
   devServer: {
     // https://webpack.js.org/configuration/dev-server/
@@ -19,17 +56,7 @@ const baseConfig = merge(webpackConfig('development'), {
     historyApiFallback: true,
     host: redwoodConfig.web.host || 'localhost',
     port: redwoodConfig.web.port,
-    proxy: {
-      [redwoodConfig.web.apiProxyPath]: {
-        target: `http://[::1]:${redwoodConfig.api.port}`,
-        pathRewrite: {
-          [`^${escapeRegExp(redwoodConfig.web.apiProxyPath)}`]: '',
-        },
-        headers: {
-          Connection: 'keep-alive',
-        },
-      },
-    },
+    proxy: getProxyConfig(),
     inline: true,
     overlay: true,
     open: redwoodConfig.browser.open,
@@ -45,5 +72,4 @@ const baseConfig = merge(webpackConfig('development'), {
   plugins: [new ErrorOverlayPlugin()].filter(Boolean),
 })
 
-/** @type {import('webpack').Configuration} */
 module.exports = mergeUserWebpackConfig('development', baseConfig)

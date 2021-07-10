@@ -16,7 +16,8 @@ let CURRENT_USER_DATA: { name: string; email: string; roles?: string[] } = {
   email: 'nospam@example.net',
 }
 
-window.__REDWOOD__API_PROXY_PATH = '/.netlify/functions'
+global.REDWOOD_API_URL = '/.netlify/functions'
+global.REDWOOD_API_GRAPHQL_SERVER_PATH = '/graphql'
 const server = setupServer(
   graphql.query('__REDWOOD__AUTH_GET_CURRENT_USER', (_req, res, ctx) => {
     return res(

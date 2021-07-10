@@ -32,7 +32,7 @@ export const files = [
   { path: path.join(getPaths().base, 'netlify.toml'), content: NETLIFY_TOML },
 ]
 
-export const apiProxyPath = '/.netlify/functions'
+export const apiURL = '/.netlify/functions'
 
 // any notes to print out when the job is done
 export const notes = [

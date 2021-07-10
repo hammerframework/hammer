@@ -119,24 +119,25 @@ export class AuthProvider extends React.Component<
     return this.reauthenticate()
   }
 
+  getApiGraphQLUrl = () => {
+    return global.REDWOOD_API_URL + global.REDWOOD_API_GRAPHQL_SERVER_PATH
+  }
+
   getCurrentUser = async (): Promise<Record<string, unknown>> => {
     // Always get a fresh token, rather than use the one in state
     const token = await this.getToken()
-    const response = await global.fetch(
-      `${global.__REDWOOD__API_PROXY_PATH}/graphql`,
-      {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'auth-provider': this.rwClient.type,
-          authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query:
-            'query __REDWOOD__AUTH_GET_CURRENT_USER { redwood { currentUser } }',
-        }),
-      }
-    )
+    const response = await global.fetch(this.getApiGraphQLUrl(), {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'auth-provider': this.rwClient.type,
+        authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query:
+          'query __REDWOOD__AUTH_GET_CURRENT_USER { redwood { currentUser } }',
+      }),
+    })
 
     if (response.ok) {
       const { data } = await response.json()

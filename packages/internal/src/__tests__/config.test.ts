@@ -30,8 +30,8 @@ describe('getConfig', () => {
         },
         "web": Object {
           "a11y": true,
-          "apiProxyPath": "/.netlify/functions",
-          "apiProxyPort": 8911,
+          "apiGraphQLServerPath": "/graphql",
+          "apiURL": "/.netlify/functions",
           "fastRefresh": true,
           "host": "localhost",
           "path": "./web",
