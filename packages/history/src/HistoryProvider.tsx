@@ -1,11 +1,9 @@
-import { createContext, useCallback, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useRef } from 'react'
 
 type Listener = () => void
 
 export interface HistoryState {
   addListener: (listener: Listener) => void
-  push: (data: any, title: string, url: string) => void
-  replace: (data: any, title: string, url: string) => void
 }
 
 export const HistoryContext = createContext<HistoryState | undefined>(undefined)
@@ -15,35 +13,16 @@ interface Props {
 }
 
 export const HistoryProvider: React.FC<Props> = ({ children }) => {
-  // TODO: useRef instead?
-  const [listeners, setListeners] = useState<Listener[]>([])
+  // Normally I'd use `useState` here, but there is no need to re-render
+  // when a listener is added or removed, so using a ref instead
+  const listeners = useRef<Listener[]>([])
 
-  const addListener = useCallback(
-    (listener) => {
-      listeners.push(listener)
-      setListeners(listeners)
-    },
-    [listeners]
-  )
-
-  const push = useCallback(
-    (data: any, title: string, url: string) => {
-      global.history.pushState(data, title, url)
-      listeners.forEach((listener) => listener())
-    },
-    [listeners]
-  )
-
-  const replace = useCallback(
-    (data: any, title: string, url: string) => {
-      global.history.replaceState(data, title, url)
-      listeners.forEach((listener) => listener())
-    },
-    [listeners]
-  )
+  const addListener = useCallback((listener) => {
+    listeners.current.push(listener)
+  }, [])
 
   return (
-    <HistoryContext.Provider value={{ addListener, push, replace }}>
+    <HistoryContext.Provider value={{ addListener }}>
       {children}
     </HistoryContext.Provider>
   )
