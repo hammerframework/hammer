@@ -3,7 +3,7 @@ import fs from 'fs'
 import concurrently from 'concurrently'
 import terminalLink from 'terminal-link'
 
-import { getConfig, shutdownPort } from '@redwoodjs/internal'
+import { getConfig, getConfigPath, shutdownPort } from '@redwoodjs/internal'
 
 import { getPaths } from 'src/lib'
 import c from 'src/lib/colors'
@@ -94,17 +94,19 @@ export const handler = async ({
     '@redwoodjs/core/config/webpack.development.js'
   )
 
+  const redwoodConfigPath = getConfigPath()
+
   /** @type {Record<string, import('concurrently').CommandObj>} */
   const jobs = {
     api: {
       name: 'api',
-      command: `cd "${rwjsPaths.api.base}" && yarn cross-env NODE_ENV=development yarn dev-server`,
+      command: `cd "${rwjsPaths.api.base}" && yarn cross-env NODE_ENV=development nodemon --watch "${redwoodConfigPath}" --exec "yarn dev-server"`,
       prefixColor: 'cyan',
       runWhen: () => fs.existsSync(rwjsPaths.api.src),
     },
     web: {
       name: 'web',
-      command: `cd "${rwjsPaths.web.base}" && yarn cross-env NODE_ENV=development webpack-dev-server --config "${webpackDevConfig}" ${forward}`,
+      command: `cd "${rwjsPaths.web.base}" && yarn cross-env NODE_ENV=development nodemon --watch "${redwoodConfigPath}" --exec "webpack-dev-server --config "${webpackDevConfig}" ${forward}"`,
       prefixColor: 'blue',
       runWhen: () => fs.existsSync(rwjsPaths.web.src),
     },
@@ -118,8 +120,7 @@ export const handler = async ({
 
   if (esbuild) {
     jobs.api.name = 'api esbuild'
-    jobs.api.command =
-      'yarn cross-env NODE_ENV=development NODE_OPTIONS=--enable-source-maps yarn rw-api-server-watch'
+    jobs.api.command = `yarn cross-env NODE_ENV=development NODE_OPTIONS=--enable-source-maps nodemon --watch "${redwoodConfigPath}" --exec "yarn rw-api-server-watch"`
 
     jobs.web.name = 'web esbuild'
     jobs.web.command = 'yarn cross-env ESBUILD=1 && ' + jobs.web.command
