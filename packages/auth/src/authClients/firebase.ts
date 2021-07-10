@@ -14,19 +14,41 @@ export type oAuthProvider =
   | 'microsoft.com'
   | 'apple.com'
 
-export type PasswordCreds = { email: string; password: string }
+export type Prompt = 'none' | 'consent' | 'select_account'
 
-const isPasswordCreds = (
-  withCreds: oAuthProvider | PasswordCreds
-): withCreds is PasswordCreds => {
-  const creds = withCreds as PasswordCreds
-  return creds.email !== undefined && creds.password !== undefined
+// valid parameters as of 2021-06-12 at https://firebase.google.com/docs/reference/js/firebase.auth.GoogleAuthProvider#setcustomparameters
+export type CustomParameters = {
+  hd?: string
+  include_granted_scopes?: boolean
+  login_hint?: string
+  prompt?: Prompt
+}
+
+export type Options = {
+  providerId?: oAuthProvider
+  email?: string
+  password?: string
+  scopes?: string[] // scopes available at https://developers.google.com/identity/protocols/oauth2/scopes
+  customParameters?: CustomParameters
+}
+
+const hasPasswordCreds = (options: Options): boolean => {
+  return options.email !== undefined && options.password !== undefined
 }
 
 export const firebase = (client: Firebase): AuthClient => {
   // Use a function to allow us to extend for non-oauth providers in the future
   const getProvider = (providerId: oAuthProvider) => {
     return new client.auth.OAuthProvider(providerId)
+  }
+  const applyProviderOptions = (provider: any, options: Options) => {
+    if (options.customParameters) {
+      provider.setCustomParameters(options.customParameters)
+    }
+    if (options.scopes) {
+      options.scopes.forEach((scope) => provider.addScope(scope))
+    }
+    return provider
   }
   // Firebase auth functions return a goog.Promise which as of 2021-05-12 does
   // not appear to work with try {await} catch blocks as exceptions are not caught.
@@ -46,30 +68,54 @@ export const firebase = (client: Firebase): AuthClient => {
     type: 'firebase',
     client,
     restoreAuthState: () => repackagePromise(client.auth().getRedirectResult()),
-    login: (withAuth: oAuthProvider | PasswordCreds = 'google.com') => {
-      if (isPasswordCreds(withAuth)) {
+    login: (
+      options: oAuthProvider | Options = { providerId: 'google.com' }
+    ) => {
+      // If argument provided is a string, it should be the oAuth Provider
+      // Cast the provider string into the options object
+      if (typeof options === 'string') {
+        options = { providerId: options }
+      }
+      if (hasPasswordCreds(options)) {
         return repackagePromise(
           client
             .auth()
-            .signInWithEmailAndPassword(withAuth.email, withAuth.password)
+            .signInWithEmailAndPassword(
+              options.email as string,
+              options.password as string
+            )
         )
       }
 
-      const provider = getProvider(withAuth)
-      return client.auth().signInWithPopup(provider)
+      const provider = getProvider(options.providerId || 'google.com')
+      const providerWithOptions = applyProviderOptions(provider, options)
+      return repackagePromise(
+        client.auth().signInWithPopup(providerWithOptions)
+      )
     },
     logout: () => repackagePromise(client.auth().signOut()),
-    signup: (withAuth: oAuthProvider | PasswordCreds = 'google.com') => {
-      if (isPasswordCreds(withAuth)) {
+    signup: (
+      options: oAuthProvider | Options = { providerId: 'google.com' }
+    ) => {
+      if (typeof options === 'string') {
+        options = { providerId: options }
+      }
+      if (hasPasswordCreds(options)) {
         return repackagePromise(
           client
             .auth()
-            .createUserWithEmailAndPassword(withAuth.email, withAuth.password)
+            .createUserWithEmailAndPassword(
+              options.email as string,
+              options.password as string
+            )
         )
       }
 
-      const provider = getProvider(withAuth)
-      return repackagePromise(client.auth().signInWithPopup(provider))
+      const provider = getProvider(options.providerId || 'google.com')
+      const providerWithOptions = applyProviderOptions(provider, options)
+      return repackagePromise(
+        client.auth().signInWithPopup(providerWithOptions)
+      )
     },
     getToken: () => {
       const currentUser = client.auth().currentUser
