@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@types/listr": "0.14.3",
-    "@types/node-fetch": "2.5.10"
+    "@types/node-fetch": "2.5.11"
   },
   "scripts": {
     "dev": "RWJS_CWD=../../__fixtures__/example-todo-main node dist/index.js",
