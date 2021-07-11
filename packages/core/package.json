@@ -39,7 +39,7 @@
     "glob": "7.1.7",
     "@babel/runtime-corejs3": "7.14.0",
     "x----x----x": "^0 Bins",
-    "esbuild": "0.12.5",
+    "esbuild": "0.12.15",
     "typescript": "4.3.5",
     "cross-env": "7.0.3",
     "x----x----x": "^0 Webpack",
