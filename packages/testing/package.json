@@ -27,7 +27,7 @@
     "x----x----x": "^0 Types",
     "ts-toolbelt": "9.6.0",
     "@types/jest": "26.0.24",
-    "@types/node": "16.0.0",
+    "@types/node": "16.3.1",
     "@types/react": "17.0.13",
     "@types/react-dom": "17.0.8",
     "@types/webpack": "5.28.0",
