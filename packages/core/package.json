@@ -71,7 +71,7 @@
     "esbuild-loader": "2.13.1"
   },
   "devDependencies": {
-    "@types/babel-core": "6.25.6",
+    "@types/babel-core": "6.25.7",
     "@types/babel-plugin-tester": "9.0.2",
     "babel-plugin-tester": "10.1.0"
   },
