@@ -29,7 +29,7 @@
     "glob": "7.1.7",
     "graphql": "15.5.1",
     "kill-port": "1.6.1",
-    "prettier": "2.3.0",
+    "prettier": "2.3.2",
     "toml": "3.0.0"
   },
   "devDependencies": {
