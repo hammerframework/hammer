@@ -16,7 +16,7 @@
     "@redwoodjs/web": "0.34.1",
     "@testing-library/react": "11.2.7",
     "msw": "0.30.1",
-    "@storybook/react": "6.3.2",
+    "@storybook/react": "6.3.4",
     "@storybook/addon-a11y": "6.3.2",
     "@testing-library/jest-dom": "5.11.10",
     "@testing-library/user-event": "13.1.9",
