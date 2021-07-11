@@ -24,7 +24,7 @@
     "@graphql-codegen/typescript-react-apollo": "2.3.0",
     "@graphql-codegen/typescript-resolvers": "1.19.5",
     "deepmerge": "4.2.2",
-    "fast-glob": "3.2.5",
+    "fast-glob": "3.2.7",
     "findup-sync": "4.0.0",
     "glob": "7.1.7",
     "graphql": "15.5.1",
