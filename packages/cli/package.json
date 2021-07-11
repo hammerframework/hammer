@@ -49,7 +49,7 @@
     "yargs": "16.0.3"
   },
   "devDependencies": {
-    "@types/listr": "0.14.3",
+    "@types/listr": "0.14.4",
     "@types/node-fetch": "2.5.10"
   },
   "scripts": {
