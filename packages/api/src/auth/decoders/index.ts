@@ -6,6 +6,7 @@ import type { GlobalContext } from 'src/globalContext'
 
 import { auth0 } from './auth0'
 import { azureActiveDirectory } from './azureActiveDirectory'
+import { dbAuth } from './dbAuth'
 import { ethereum } from './ethereum'
 import { netlify } from './netlify'
 import { nhost } from './nhost'
@@ -34,6 +35,7 @@ const typesToDecoders: Record<
   firebase: noop,
   supabase: supabase,
   ethereum: ethereum,
+  dbAuth: dbAuth,
   custom: noop,
 }
 

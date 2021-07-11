@@ -1,10 +1,10 @@
-import * as auth0Decoder from './../auth/decoders/auth0'
-import { decodeToken } from './../auth/decoders/index'
-import * as netlifyDecoder from './../auth/decoders/netlify'
-import * as supabaseDecoder from './../auth/decoders/supabase'
-import mockedAPIGatewayProxyEvent from './fixtures/apiGatewayProxyEvent.fixture'
+import * as auth0Decoder from '../../auth/decoders/auth0'
+import { decodeToken } from '../../auth/decoders/index'
+import * as netlifyDecoder from '../../auth/decoders/netlify'
+import * as supabaseDecoder from '../../auth/decoders/supabase'
+import mockedAPIGatewayProxyEvent from '../fixtures/apiGatewayProxyEvent.fixture'
 
-jest.mock('./../auth/decoders/auth0', () => {
+jest.mock('./../../auth/decoders/auth0', () => {
   return {
     auth0: jest.fn().mockImplementation(async () => {
       return { decodedWith: 'auth0', fakeDecodedToken: true }
@@ -12,7 +12,7 @@ jest.mock('./../auth/decoders/auth0', () => {
   }
 })
 
-jest.mock('./../auth/decoders/netlify', () => {
+jest.mock('./../../auth/decoders/netlify', () => {
   return {
     netlify: jest.fn().mockImplementation(async () => {
       return { decodedWith: 'netlify', fakeDecodedToken: true }
@@ -20,7 +20,7 @@ jest.mock('./../auth/decoders/netlify', () => {
   }
 })
 
-jest.mock('./../auth/decoders/supabase', () => {
+jest.mock('./../../auth/decoders/supabase', () => {
   return {
     supabase: jest.fn().mockImplementation(async () => {
       return { decodedWith: 'supabase', fakeDecodedToken: true }

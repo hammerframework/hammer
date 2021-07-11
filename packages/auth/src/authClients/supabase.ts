@@ -14,7 +14,7 @@ export interface AuthClientSupabase extends AuthClient {
    * @param options.email The user's email address.
    * @param options.password The user's password.
    * @param options.refreshToken A valid refresh token that was returned on login.
-   * @param { 'apple' | 'azure' | 'bitbucket' | 'facebook' | 'github' | 'gitlab' | 'google' | 'twitter' } options.provider One of the providers supported by GoTrue.
+   * @param { 'apple' | 'azure' | 'bitbucket' | 'discord' | 'facebook' | 'github' | 'gitlab' | 'google' | 'twitter' } options.provider One of the providers supported by GoTrue.
    * @param redirectTo A URL or mobile address to send the user to after they are confirmed.
    * @param scopes A space-separated list of scopes granted to the OAuth application.
    */

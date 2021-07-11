@@ -20,7 +20,9 @@ export function command_builder(
 }
 
 class CommandBuilder {
-  constructor(private opts: Opts) {}
+  constructor(private opts: Opts) {
+    this.prompts = new PromptHelper(this.opts)
+  }
 
   @memo()
   async buildCommand(): Promise<RedwoodCommandString | undefined> {
@@ -94,7 +96,7 @@ class CommandBuilder {
     }
   }
 
-  prompts = new PromptHelper(this.opts)
+  prompts: PromptHelper
 
   @memo()
   async arg_command(): Promise<string> {

@@ -24,8 +24,8 @@ const updatePackageVersion = (pkgPath, version) => {
     for (const depName of Object.keys(pkg.dependencies).filter((x) =>
       x.startsWith('@redwoodjs/')
     )) {
-      console.log(` - ${depName}: ${pkg.dependencies[depName]} => ^${version}`)
-      pkg.dependencies[depName] = `^${version}`
+      console.log(` - ${depName}: ${pkg.dependencies[depName]} => ${version}`)
+      pkg.dependencies[depName] = `${version}`
     }
   }
   if (pkg.devDependencies) {
@@ -33,15 +33,15 @@ const updatePackageVersion = (pkgPath, version) => {
       x.startsWith('@redwoodjs/')
     )) {
       console.log(
-        ` - ${depName}: ${pkg.devDependencies[depName]} => ^${version}`
+        ` - ${depName}: ${pkg.devDependencies[depName]} => ${version}`
       )
-      pkg.devDependencies[depName] = `^${version}`
+      pkg.devDependencies[depName] = `${version}`
     }
   }
 
   fs.writeFileSync(
     path.join(pkgPath, 'package.json'),
-    JSON.stringify(pkg, undefined, 2)
+    JSON.stringify(pkg, undefined, 2) + '\n'
   )
 }
 
@@ -68,6 +68,21 @@ const templatePath = path.join(cwd, 'packages/create-redwood-app/template')
 updatePackageVersion(templatePath, version)
 updatePackageVersion(path.join(templatePath, 'api'), version)
 updatePackageVersion(path.join(templatePath, 'web'), version)
+console.log()
+console.log('Updating framework-tools...')
+console.log('Changes: ')
+const fwTools = path.join(cwd, 'tasks/framework-tools')
+updatePackageVersion(fwTools, version)
+console.log()
+// Lerna adds '^' to dependencies. To pin, we need to overwrite.
+console.log("Clean up Lerna version bump dependency '^'...")
+const packagesDir = path.join(cwd, 'packages')
+fs.readdirSync(packagesDir).forEach((file) => {
+  if (fs.statSync(packagesDir + '/' + file).isDirectory()) {
+    console.log(`Package ${file}:`)
+    updatePackageVersion(path.join(packagesDir, file), version)
+  }
+})
 console.log()
 console.log(`All done! You are now ready to publish ${version}.`)
 console.log()

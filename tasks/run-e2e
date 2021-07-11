@@ -127,6 +127,14 @@ const convertProjectToJavaScript = () => {
   }
 }
 
+const setRedwoodSecureServices = () => {
+  console.log('Setting Secure RedwoodJS services...')
+  execa.sync(' echo "REDWOOD_SECURE_SERVICES=1" >> .env', {
+    cwd: REDWOOD_PROJECT_DIRECTORY,
+    shell: true,
+    stdio: 'inherit',
+  })
+}
 const runDevServerInBackground = () => {
   console.log('Starting RedwoodJS dev server...')
   execa.sync('yarn rw dev --no-generate --fwd="--open=false" &', {
@@ -160,11 +168,30 @@ const installTaskDeps = () => {
   })
 }
 
+const initGit = () => {
+  console.log('Initializing Git')
+  execa.sync('git init --initial-branch main && git add .', {
+    cwd: REDWOOD_PROJECT_DIRECTORY,
+    shell: true,
+    stdio: 'inherit',
+  })
+  execa.sync('git commit -a --message=init', {
+    cwd: REDWOOD_PROJECT_DIRECTORY,
+    shell: true,
+    stdio: 'inherit',
+  })
+}
+
 const args = yargs
   .option('create-project', { default: true, type: 'boolean', alias: 'create' })
   .option('copy-framework', { default: true, type: 'boolean', alias: 'copy' })
   .option('typescript', { default: false, type: 'boolean', alias: 'ts' })
   .option('auto-start', { default: true, type: 'boolean', alias: 'start' })
+  .option('secure-services', {
+    default: true,
+    type: 'boolean',
+    alias: 'secure',
+  })
   .scriptName('run-e2e')
   .example('run-e2e')
   .example('run-e2e /tmp/redwood-app --ts')
@@ -188,7 +215,8 @@ makeDirectory(REDWOOD_PROJECT_DIRECTORY)
 console.log()
 console.log('-'.repeat(80))
 
-let { copyFramework, createProject, typescript, autoStart } = args
+let { copyFramework, createProject, typescript, autoStart, secureServices } =
+  args
 
 const tasks = [
   copyFramework && buildRedwoodJSFramework,
@@ -197,8 +225,10 @@ const tasks = [
   copyFramework && copyFrameworkPackages,
   copyFramework && runYarnInstall,
   !typescript && convertProjectToJavaScript,
+  secureServices && setRedwoodSecureServices,
   autoStart && runDevServerInBackground,
   autoStart && installTaskDeps,
+  autoStart && initGit,
   autoStart && runCypress,
 ].filter(Boolean)
 

@@ -1,9 +1,12 @@
+import type { Find${pluralPascalName} } from 'types/graphql'
+import type { CellSuccessProps, CellFailureProps } from '@redwoodjs/web'
+
 import { Link, routes } from '@redwoodjs/router'
 
 import ${pluralPascalName} from '${importComponentNames}'
 
 export const QUERY = gql`
-  query ${pluralConstantName} {
+  query Find${pluralPascalName} {
     ${pluralCamelName} {<% columns.forEach(column => { %>
       <%= column.name %><% }) %>
     }
@@ -26,6 +29,10 @@ export const Empty = () => {
   )
 }
 
-export const Success = ({ ${pluralCamelName} }) => {
+export const Failure = ({ error }: CellFailureProps) => (
+  <div style={{ color: 'red' }}>Error: {error.message}</div>
+)
+
+export const Success = ({ ${pluralCamelName} }: CellSuccessProps<Find${pluralPascalName}>) => {
   return <${pluralPascalName} ${pluralCamelName}={${pluralCamelName}} />
 }

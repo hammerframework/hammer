@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { context, getPerRequestContext } from '../globalContext'
-
-import { createContextHandler } from './graphql'
+import { context, getPerRequestContext } from '../../globalContext'
+import { createContextHandler } from '../graphql'
 
 describe('global context handlers', () => {
   beforeAll(() => {

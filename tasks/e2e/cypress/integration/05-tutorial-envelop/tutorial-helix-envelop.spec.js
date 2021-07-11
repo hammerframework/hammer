@@ -25,15 +25,25 @@ import Step7_1_BlogLayout from '../01-tutorial/codemods/Step7_1_BlogLayout'
 import Step7_2_ContactPage from '../01-tutorial/codemods/Step7_2_ContactPage'
 import Step7_3_Css from '../01-tutorial/codemods/Step7_3_Css'
 import Step7_4_Routes from '../01-tutorial/codemods/Step7_4_Routes'
+import Step8_1_ContactPageWithoutJsEmailValidation from '../01-tutorial/codemods/Step8_1_ContactPageWithoutJsEmailValidation'
+import Step9_1_RequireAuth from '../01-tutorial/codemods/Step9_1_RequireAuth'
+import Step9_2_PostsRequireAuth from '../01-tutorial/codemods/Step9_2_PostsRequireAuth'
+import Step9_3_DisableAuth from '../01-tutorial/codemods/Step9_3_DisableAuth'
 
 import Step0_1_RedwoodToml from './codemods/Step0_1_RedwoodToml'
 import Step0_2_GraphQL from './codemods/Step0_2_GraphQL'
+import Step8_2_CreateContactServiceValidation from './codemods/Step8_2_CreateContactServiceValidation'
 
 const BASE_DIR = Cypress.env('RW_PATH')
 
 describe('The Redwood Tutorial - Golden path Helix/Envelop edition', () => {
   // TODO: https://redwoodjs.com/tutorial/saving-data
   // TODO: https://redwoodjs.com/tutorial/administration
+  before(() => {
+    cy.exec(`cd ${BASE_DIR}; git restore . && git clean -df`, {
+      failOnNonZeroExit: false,
+    })
+  })
 
   it('0. Starting Development', () => {
     // reset redwood toml to use envelop
@@ -255,6 +265,7 @@ describe('The Redwood Tutorial - Golden path Helix/Envelop edition', () => {
   it("7. Everyone's Favorite Thing to Build: Forms", () => {
     // https://redwoodjs.com/tutorial/everyone-s-favorite-thing-to-build-forms
     cy.exec(`cd ${BASE_DIR}; yarn rw g page contact --force`)
+
     cy.writeFile(
       path.join(BASE_DIR, 'web/src/layouts/BlogLayout/BlogLayout.js'),
       Step7_1_BlogLayout
@@ -280,5 +291,66 @@ describe('The Redwood Tutorial - Golden path Helix/Envelop edition', () => {
     cy.get('input#email').type('foo@bar.com')
     cy.get('textarea#message').type('test message')
     cy.get('#tutorial-form').submit()
+  })
+
+  it('8. Saving Data', () => {
+    // navigate back out
+    cy.visit('http://localhost:8910/')
+
+    // Create a CRUD contacts service
+    cy.exec(`cd ${BASE_DIR}; yarn rw g sdl contact --force --crud`)
+
+    cy.writeFile(
+      path.join(BASE_DIR, 'web/src/pages/ContactPage/ContactPage.js'),
+      Step8_1_ContactPageWithoutJsEmailValidation
+    )
+
+    cy.writeFile(
+      path.join(BASE_DIR, 'api/src/services/contacts/contacts.js'),
+      Step8_2_CreateContactServiceValidation
+    )
+
+    // then get to new contact with api side validation
+    cy.contains('Contact').click()
+
+    cy.get('input#name').clear().type('test name')
+    cy.get('input#email').clear().type('foo bar com')
+    cy.get('textarea#message').clear().type('test message')
+    cy.contains('Save').click()
+
+    cy.get('main').should('contain', "Can't create new contact")
+    cy.get('main').should('contain', 'is not formatted like an email address')
+
+    // then test saving with a valid email
+    cy.get('input#email').clear().type('test@example.com')
+    cy.contains('Save').click()
+
+    cy.get('main').should('contain', 'Thank you for your submission')
+  })
+
+  it('9. Auth - Render Cell Failure Message', () => {
+    // enable auth
+    cy.writeFile(
+      path.join(BASE_DIR, 'api/src/lib/auth.js'),
+      Step9_1_RequireAuth
+    )
+
+    cy.writeFile(
+      path.join(BASE_DIR, 'api/src/services/posts/posts.js'),
+      Step9_2_PostsRequireAuth
+    )
+
+    cy.visit('http://localhost:8910/posts')
+
+    cy.get('main').should('not.contain', 'Second post')
+
+    cy.get('main > div:nth-child(1)').should('contain', 'Error')
+    cy.get('main > div:nth-child(1)').should('contain', "can't do that")
+
+    // disable auth
+    cy.writeFile(
+      path.join(BASE_DIR, 'api/src/lib/auth.js'),
+      Step9_3_DisableAuth
+    )
   })
 })

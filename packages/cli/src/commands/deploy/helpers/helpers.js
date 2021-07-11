@@ -42,7 +42,7 @@ export const deployHandler = async ({ build, prisma, dm: dataMigrate }) => {
     commandSet.push('yarn rw prisma migrate deploy')
   }
   if (dataMigrate) {
-    commandSet.push('yarn rw dataMigrate up')
+    commandSet.push('yarn rw data-migrate up')
   }
 
   const joinedCommands = commandSet.join(' && ')

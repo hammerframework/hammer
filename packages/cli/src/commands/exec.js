@@ -12,6 +12,14 @@ import { generatePrismaClient } from 'src/lib/generatePrismaClient'
 const runScript = async (scriptPath, scriptArgs) => {
   const script = await import(scriptPath)
   await script.default({ args: scriptArgs })
+
+  try {
+    const { db } = await import(path.join(getPaths().api.lib, 'db'))
+    db.$disconnect()
+  } catch (e) {
+    // silence
+  }
+
   return
 }
 

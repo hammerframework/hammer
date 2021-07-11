@@ -38,3 +38,7 @@ model UserProfile {
   userId   Int
   user     User   @relation(fields: [userId], references: [id])
 }
+
+model NoEditableField {
+  id Int @id @default(autoincrement())
+}

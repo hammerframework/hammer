@@ -1,6 +1,10 @@
 import Edit${singularPascalName}Cell from '${importComponentEditNameCell}'
 
-const Edit${singularPascalName}Page = ({ id }) => {
+type ${pascalName}PageProps = {
+  id: ${idType}
+}
+
+const Edit${singularPascalName}Page = ({ id }: ${pascalName}PageProps) => {
   return <Edit${singularPascalName}Cell id={id} />
 }
 

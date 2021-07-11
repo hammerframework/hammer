@@ -1,10 +1,14 @@
+import type { Edit${singularPascalName}ById } from 'types/graphql'
+
+import type { CellSuccessProps, CellFailureProps } from '@redwoodjs/web'
 import { useMutation } from '@redwoodjs/web'
 import { toast } from '@redwoodjs/web/toast'
 import { navigate, routes } from '@redwoodjs/router'
+
 import ${singularPascalName}Form from '${importComponentNameForm}'
 
 export const QUERY = gql`
-  query Find${singularPascalName}ById($id: ${idType}!) {
+  query Edit${singularPascalName}ById($id: ${idType}!) {
     ${singularCamelName}: ${singularCamelName}(id: $id) {<% columns.forEach(column => { %>
       <%= column.name %><% }) %>
     }
@@ -20,7 +24,11 @@ const UPDATE_${singularConstantName}_MUTATION = gql`
 
 export const Loading = () => <div>Loading...</div>
 
-export const Success = ({ ${singularCamelName} }) => {
+export const Failure = ({ error }: CellFailureProps) => (
+  <div style={{ color: 'red' }}>Error: {error.message}</div>
+)
+
+export const Success = ({ ${singularCamelName} }: CellSuccessProps<Edit${singularPascalName}ById>) => {
   const [update${singularPascalName}, { loading, error }] = useMutation(UPDATE_${singularConstantName}_MUTATION, {
     onCompleted: () => {
       toast.success('${singularPascalName} updated')

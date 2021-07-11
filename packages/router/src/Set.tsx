@@ -1,10 +1,8 @@
 import React, { ReactElement, ReactNode, useCallback } from 'react'
 
 import { Redirect } from './links'
-import { useLocation } from './location'
-import { isRoute, routes as namedRoutes } from './router'
+import { routes as namedRoutes } from './router'
 import { useRouterState } from './router-context'
-import { flattenAll, matchPath } from './util'
 
 type WrapperType<WTProps> = (
   props: WTProps & { children: ReactNode }
@@ -30,6 +28,8 @@ type SetProps<P> = P & {
   /** Prerender all pages in the set */
   prerender?: boolean
   children: ReactNode
+  /** Loading state for auth to distinguish with whileLoading */
+  whileLoadingAuth?: () => React.ReactElement | null
 }
 
 const IdentityWrapper: WrapperType<Record<string, any>> = ({ children }) => {
@@ -43,10 +43,10 @@ export function Set<WrapperProps>(props: SetProps<WrapperProps>) {
     private: privateSet,
     unauthenticated,
     role,
+    whileLoadingAuth,
     ...rest
   } = props
   const routerState = useRouterState()
-  const location = useLocation()
   const { loading, isAuthenticated, hasRole } = routerState.useAuth()
 
   if (privateSet && !unauthenticated) {
@@ -61,54 +61,36 @@ export function Set<WrapperProps>(props: SetProps<WrapperProps>) {
 
   // Make sure `wrappers` is always an array with at least one wrapper component
   const wrappers = Array.isArray(wrap) ? wrap : [wrap ? wrap : IdentityWrapper]
-  const flatChildArray = flattenAll(children)
-  const routes = flatChildArray
-    .filter(isRoute)
-    .filter((r) => typeof r.props.path !== 'undefined')
 
-  for (const route of routes) {
-    const path = route.props.path as string
+  if (privateSet && unauthorized()) {
+    if (loading) {
+      return whileLoadingAuth?.() || null
+    } else {
+      const currentLocation =
+        global.location.pathname + encodeURIComponent(global.location.search)
 
-    const { match } = matchPath(path, location.pathname, routerState.paramTypes)
-    if (!match) {
-      continue
-    }
+      // We already have a check for !unauthenticated further up
+      const unauthenticatedPath = namedRoutes[unauthenticated || '']()
 
-    if (privateSet && unauthorized()) {
-      if (loading) {
-        return route.props?.whileLoading?.() || null
-      } else {
-        const currentLocation =
-          global.location.pathname + encodeURIComponent(global.location.search)
-
-        // We already have a check for !unauthenticated further up
-        const unauthenticatedPath = namedRoutes[unauthenticated || '']()
-
-        if (!unauthenticatedPath) {
-          throw new Error(`We could not find a route named ${unauthenticated}`)
-        }
-
-        return (
-          <Redirect
-            to={`${unauthenticatedPath}?redirectTo=${currentLocation}`}
-          />
-        )
+      if (!unauthenticatedPath) {
+        throw new Error(`We could not find a route named ${unauthenticated}`)
       }
-    }
 
-    // Expand and nest the wrapped elements.
-    return (
-      wrappers.reduceRight<ReduceType>((acc, wrapper) => {
-        return React.createElement(wrapper, {
-          ...rest,
-          children: acc ? acc : children,
-        } as SetProps<WrapperProps>)
-      }, undefined) || null
-    )
+      return (
+        <Redirect to={`${unauthenticatedPath}?redirectTo=${currentLocation}`} />
+      )
+    }
   }
 
-  // No match, no render.
-  return null
+  // Expand and nest the wrapped elements.
+  return (
+    wrappers.reduceRight<ReduceType>((acc, wrapper) => {
+      return React.createElement(wrapper, {
+        ...rest,
+        children: acc ? acc : children,
+      } as SetProps<WrapperProps>)
+    }, undefined) || null
+  )
 }
 
 type PrivateProps<P> = Omit<

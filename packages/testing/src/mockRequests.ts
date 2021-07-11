@@ -123,6 +123,7 @@ const mockGraphQL = (
         set: captureTransform(ctx.set),
         fetch: captureTransform(ctx.fetch),
         data: captureTransform(ctx.data),
+        cookie: captureTransform(ctx.cookie),
       }
 
       d = data(req.variables, {

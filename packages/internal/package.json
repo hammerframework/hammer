@@ -13,28 +13,28 @@
   "license": "MIT",
   "dependencies": {
     "@babel/parser": "7.14.4",
-    "@babel/plugin-transform-typescript": "7.14.4",
+    "@babel/plugin-transform-typescript": "7.14.6",
     "@babel/runtime-corejs3": "7.14.0",
     "@babel/traverse": "7.14.2",
-    "@graphql-codegen/cli": "1.21.5",
+    "@graphql-codegen/cli": "1.21.6",
     "@graphql-codegen/core": "1.17.10",
     "@graphql-codegen/schema-ast": "1.18.3",
-    "@graphql-codegen/typescript": "1.22.1",
-    "@graphql-codegen/typescript-operations": "1.18.0",
-    "@graphql-codegen/typescript-react-apollo": "2.2.5",
-    "@graphql-codegen/typescript-resolvers": "1.19.2",
+    "@graphql-codegen/typescript": "1.22.4",
+    "@graphql-codegen/typescript-operations": "1.18.3",
+    "@graphql-codegen/typescript-react-apollo": "2.3.0",
+    "@graphql-codegen/typescript-resolvers": "1.19.5",
     "deepmerge": "4.2.2",
     "fast-glob": "3.2.5",
     "findup-sync": "4.0.0",
     "glob": "7.1.7",
-    "graphql": "15.5.0",
+    "graphql": "15.5.1",
     "kill-port": "1.6.1",
     "prettier": "2.3.0",
     "toml": "3.0.0"
   },
   "devDependencies": {
     "@types/findup-sync": "4.0.0",
-    "graphql-tag": "^2.12.4"
+    "graphql-tag": "2.12.5"
   },
   "jest": {
     "testPathIgnorePatterns": [

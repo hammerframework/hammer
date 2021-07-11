@@ -44,6 +44,7 @@ const withFunctions = (app: Application, apiRootPath: string) => {
   app.use(
     bodyParser.text({
       type: ['text/*', 'application/json', 'multipart/form-data'],
+      limit: process.env.BODY_PARSER_LIMIT,
     })
   )
 

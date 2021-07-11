@@ -423,18 +423,38 @@ const wrapWithSet = (routesContent, layout, routes, newLineAndIndent) => {
 export const addRoutesToRouterTask = (routes, layout) => {
   const redwoodPaths = getPaths()
   const routesContent = readFile(redwoodPaths.web.routes).toString()
-  const newRoutes = routes.filter((route) => !routesContent.includes(route))
-  const [routerStart, newLineAndIndent] = routesContent.match(/<Router>(\s*)/)
-  const routesBatch = layout
-    ? wrapWithSet(routesContent, layout, newRoutes, newLineAndIndent)
-    : newRoutes.join(newLineAndIndent)
-  const newRoutesContent = routesContent.replace(
-    routerStart,
-    `${routerStart + routesBatch + newLineAndIndent}`
+  const newRoutes = routes.filter((route) => !routesContent.match(route))
+
+  if (newRoutes.length) {
+    const [routerStart, newLineAndIndent] = routesContent.match(/<Router>(\s*)/)
+    const routesBatch = layout
+      ? wrapWithSet(routesContent, layout, newRoutes, newLineAndIndent)
+      : newRoutes.join(newLineAndIndent)
+    const newRoutesContent = routesContent.replace(
+      routerStart,
+      `${routerStart + routesBatch + newLineAndIndent}`
+    )
+    writeFile(redwoodPaths.web.routes, newRoutesContent, {
+      overwriteExisting: true,
+    })
+  }
+}
+
+export const addScaffoldImport = () => {
+  const appJsPath = getPaths().web.app
+  let appJsContents = readFile(appJsPath).toString()
+
+  if (appJsContents.match('./scaffold.css')) {
+    return 'Skipping scaffold style include'
+  }
+
+  appJsContents = appJsContents.replace(
+    "import Routes from 'src/Routes'\n",
+    "import Routes from 'src/Routes'\n\nimport './scaffold.css'"
   )
-  writeFile(redwoodPaths.web.routes, newRoutesContent, {
-    overwriteExisting: true,
-  })
+  writeFile(appJsPath, appJsContents, { overwriteExisting: true })
+
+  return 'Added scaffold import to App.{js,tsx}'
 }
 
 const removeEmtpySet = (routesContent, layout) => {

@@ -1,7 +1,11 @@
 import { Link, routes } from '@redwoodjs/router'
 import { Toaster } from '@redwoodjs/web/toast'
 
-const ${pluralPascalName}Layout = (props) => {
+type ${singularPascalName}LayoutProps = {
+  children: React.ReactNode
+}
+
+const ${pluralPascalName}Layout = ({ children }: ${singularPascalName}LayoutProps) => {
   return (
     <div className="rw-scaffold">
       <Toaster />
@@ -21,7 +25,7 @@ const ${pluralPascalName}Layout = (props) => {
           <div className="rw-button-icon">+</div> New ${singularPascalName}
         </Link>
       </header>
-      <main className="rw-main">{props.children}</main>
+      <main className="rw-main">{children}</main>
     </div>
   )
 }

@@ -2,6 +2,7 @@ import React, { useContext, forwardRef } from 'react'
 
 import pascalcase from 'pascalcase'
 import {
+  get,
   useForm,
   FormProvider,
   useFormContext,
@@ -88,7 +89,7 @@ const inputTagProps = <T extends InputTagProps>(
   }, [contextError, props.name, setError])
 
   // any errors on this field
-  const validationError = errors[props.name]
+  const validationError = get(errors, props.name)
 
   // get errorStyle/errorClassName and replace style/className if present
   // Also remove transformValue from tagProps
@@ -211,7 +212,7 @@ interface FieldErrorProps extends React.HTMLProps<HTMLSpanElement> {
 
 const FieldError = (props: FieldErrorProps) => {
   const { errors } = useFormContext()
-  const validationError = errors[props.name]
+  const validationError = get(errors, props.name)
   const errorMessage =
     validationError &&
     (validationError.message ||

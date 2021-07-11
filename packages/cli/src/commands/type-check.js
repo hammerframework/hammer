@@ -11,8 +11,8 @@ import { getPaths } from 'src/lib'
 import c from 'src/lib/colors'
 import { generatePrismaClient } from 'src/lib/generatePrismaClient'
 
-export const command = 'typeCheck [sides..]'
-export const aliases = ['tsc', 'tc', 'type-check']
+export const command = 'type-check [sides..]'
+export const aliases = ['tsc', 'tc']
 export const description = 'Run a TypeScript compiler check on your project'
 export const builder = (yargs) => {
   yargs
@@ -92,6 +92,6 @@ export const handler = async ({ sides, verbose, prisma }) => {
     await tasks.run()
   } catch (e) {
     console.log(c.error(e.message))
-    process.exit(1)
+    process.exit(e?.exitCode || 1)
   }
 }

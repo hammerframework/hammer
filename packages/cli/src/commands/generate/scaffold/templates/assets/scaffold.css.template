@@ -65,6 +65,7 @@
   border-width: 1px;
   border-radius: 0.5rem;
   overflow: hidden;
+  width: 100%;
 }
 .rw-segment-header {
   background-color: #e2e8f0;
@@ -301,15 +302,21 @@
 .rw-text-center {
   text-align: center;
 }
-.rw-slide-up {
-  animation: slideUp 0.5s 1 ease;
-  animation-fill-mode: forwards;
-  overflow-y: hidden;
+.rw-login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24rem;
+  margin: 4rem auto;
+  flex-wrap: wrap;
 }
-@keyframes slideUp {
-  100% {
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
+.rw-login-container .rw-form-wrapper {
+  width: 100%;
+}
+.rw-login-link {
+  margin-top: 1rem;
+  color: #4a5568;
+  font-size: 90%;
+  text-align: center;
+  flex-basis: 100%;
 }

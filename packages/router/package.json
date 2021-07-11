@@ -8,9 +8,9 @@
   "types": "dist/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@reach/skip-nav": "0.15.0",
+    "@reach/skip-nav": "0.15.2",
     "@redwoodjs/auth": "0.34.1",
-    "core-js": "3.13.1",
+    "core-js": "3.15.2",
     "lodash.isequal": "4.5.0"
   },
   "devDependencies": {

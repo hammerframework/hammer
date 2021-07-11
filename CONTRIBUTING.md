@@ -17,6 +17,7 @@ Before interacting with the Redwood community, please read and understand our [C
       - [Option 1: Linking](#option-1-linking)
       - [Option 2: Copy and Watch](#option-2-copy-and-watch)
       - [Option 3: Copy (for Windows)](#option-3-copy-for-windows)
+      - [Option 4: Testing the CLI](#option-4-testing-the-cli)
       - [Specifying a RW_PATH](#specifying-a-rw_path)
         - [On **Linux**](#on-linux)
         - [On **MacOS**](#on-macos)
@@ -82,7 +83,7 @@ There are several options:
 At the end, you will have a fully working Redwood blog.
 
 ##### Running the Test Project Script
-Run the following in the `redwood` folder root:
+Run the following in the `redwood` folder root (_note: the script will automatically install dependencies_):
 
 ```terminal
 yarn run build:test-project <path/to/redwood-app>
@@ -270,7 +271,7 @@ yarn build
 cd packages/cli
 yarn dev --cwd /path/to/your/project
 ```
-The `yarn dev` script will build the CLI package and the `--cwd` option will make the command run in that directory. Remember to rebuild the packages if you have made a change to the code! (Tip: You can use `yarn build:watch` to automatically build the framework whilst you're making changes.)
+The `yarn dev` will run the built CLI, and the `--cwd` option will make the command run in that directory. Remember to rebuild the packages if you have made a change to the code! (Tip: You can use `yarn build:watch` to automatically build the framework whilst you're making changes.)
 
 (Tip: --cwd is optional, it will reference the `__fixtures__/example-todo-main` project in the framework.)
 

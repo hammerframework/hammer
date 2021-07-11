@@ -17,7 +17,7 @@
     "dotenv-defaults": "2.0.2",
     "express": "4.17.1",
     "glob": "7.1.7",
-    "http-proxy-middleware": "2.0.0",
+    "http-proxy-middleware": "2.0.1",
     "lodash.escape": "4.0.1",
     "morgan": "1.10.0",
     "qs": "6.9.3",
@@ -26,10 +26,10 @@
     "youch-terminal": "1.1.1"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.77",
-    "@types/express": "4.17.12",
+    "@types/aws-lambda": "8.10.78",
+    "@types/express": "4.17.13",
     "@types/lodash.escape": "4.0.6",
-    "@types/morgan": "1.9.2",
+    "@types/morgan": "1.9.3",
     "@types/qs": "6.9.6",
     "@types/stack-trace": "0.0.29"
   },

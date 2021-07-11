@@ -3,7 +3,7 @@
 exports[`Should add config lines to App.{js,tsx} Matches Auth0 Snapshot 1`] = `
 "import { AuthProvider } from '@redwoodjs/auth'
 import { Auth0Client } from '@auth0/auth0-spa-js'
-import { FatalErrorBoundary } from '@redwoodjs/web'
+import { FatalErrorBoundary, RedwoodProvider } from '@redwoodjs/web'
 import { RedwoodApolloProvider } from '@redwoodjs/web/apollo'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
@@ -32,11 +32,13 @@ const auth0 = new Auth0Client({
 
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
-    <AuthProvider client={auth0} type=\\"auth0\\">
-      <RedwoodApolloProvider>
-        <Routes />
-      </RedwoodApolloProvider>
-    </AuthProvider>
+    <RedwoodProvider>
+      <AuthProvider client={auth0} type=\\"auth0\\">
+        <RedwoodApolloProvider>
+          <Routes />
+        </RedwoodApolloProvider>
+      </AuthProvider>
+    </RedwoodProvider>
   </FatalErrorBoundary>
 )
 
@@ -48,7 +50,7 @@ exports[`Should add config lines to App.{js,tsx} Matches Firebase Snapshot 1`] =
 "import { AuthProvider } from '@redwoodjs/auth'
 import firebase from 'firebase/app'
 import 'firebase/auth'
-import { FatalErrorBoundary } from '@redwoodjs/web'
+import { FatalErrorBoundary, RedwoodProvider } from '@redwoodjs/web'
 import { RedwoodApolloProvider } from '@redwoodjs/web/apollo'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
@@ -74,11 +76,13 @@ const firebaseClient = ((config) => {
 
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
-    <AuthProvider client={firebaseClient} type=\\"firebase\\">
-      <RedwoodApolloProvider>
-        <Routes />
-      </RedwoodApolloProvider>
-    </AuthProvider>
+    <RedwoodProvider>
+      <AuthProvider client={firebaseClient} type=\\"firebase\\">
+        <RedwoodApolloProvider>
+          <Routes />
+        </RedwoodApolloProvider>
+      </AuthProvider>
+    </RedwoodProvider>
   </FatalErrorBoundary>
 )
 
@@ -89,7 +93,7 @@ export default App
 exports[`Should add config lines to App.{js,tsx} Matches azureActiveDirectory Snapshot 1`] = `
 "import { AuthProvider } from '@redwoodjs/auth'
 import { UserAgentApplication } from 'msal'
-import { FatalErrorBoundary } from '@redwoodjs/web'
+import { FatalErrorBoundary, RedwoodProvider } from '@redwoodjs/web'
 import { RedwoodApolloProvider } from '@redwoodjs/web/apollo'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
@@ -108,11 +112,13 @@ const azureActiveDirectoryClient = new UserAgentApplication({
 
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
-    <AuthProvider client={azureActiveDirectoryClient} type=\\"azureActiveDirectory\\">
-      <RedwoodApolloProvider>
-        <Routes />
-      </RedwoodApolloProvider>
-    </AuthProvider>
+    <RedwoodProvider>
+      <AuthProvider client={azureActiveDirectoryClient} type=\\"azureActiveDirectory\\">
+        <RedwoodApolloProvider>
+          <Routes />
+        </RedwoodApolloProvider>
+      </AuthProvider>
+    </RedwoodProvider>
   </FatalErrorBoundary>
 )
 
@@ -125,7 +131,7 @@ exports[`Should add config lines to App.{js,tsx} Matches ethereum Snapshot 1`] =
 import EthereumAuthClient from '@oneclickdapp/ethereum-auth'
 import { ApolloClient, InMemoryCache } from '@apollo/client'
 import { FetchConfigProvider, useFetchConfig } from '@redwoodjs/web'
-import { FatalErrorBoundary } from '@redwoodjs/web'
+import { FatalErrorBoundary, RedwoodProvider } from '@redwoodjs/web'
 import { RedwoodApolloProvider } from '@redwoodjs/web/apollo'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
@@ -170,15 +176,17 @@ let ethereum
 
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
-    <FetchConfigProvider>
-    <ApolloInjector>
-    <AuthProvider client={ethereum} type=\\"ethereum\\">
-      <RedwoodApolloProvider>
-        <Routes />
-      </RedwoodApolloProvider>
-    </AuthProvider>
-    </ApolloInjector>
-    </FetchConfigProvider>
+    <RedwoodProvider>
+      <FetchConfigProvider>
+      <ApolloInjector>
+      <AuthProvider client={ethereum} type=\\"ethereum\\">
+        <RedwoodApolloProvider>
+          <Routes />
+        </RedwoodApolloProvider>
+      </AuthProvider>
+      </ApolloInjector>
+      </FetchConfigProvider>
+    </RedwoodProvider>
   </FatalErrorBoundary>
 )
 
@@ -189,7 +197,7 @@ export default App
 exports[`Should add config lines to App.{js,tsx} Matches goTrue Snapshot 1`] = `
 "import { AuthProvider } from '@redwoodjs/auth'
 import GoTrue from 'gotrue-js'
-import { FatalErrorBoundary } from '@redwoodjs/web'
+import { FatalErrorBoundary, RedwoodProvider } from '@redwoodjs/web'
 import { RedwoodApolloProvider } from '@redwoodjs/web/apollo'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
@@ -204,11 +212,13 @@ const goTrueClient = new GoTrue({
 
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
-    <AuthProvider client={goTrueClient} type=\\"goTrue\\">
-      <RedwoodApolloProvider>
-        <Routes />
-      </RedwoodApolloProvider>
-    </AuthProvider>
+    <RedwoodProvider>
+      <AuthProvider client={goTrueClient} type=\\"goTrue\\">
+        <RedwoodApolloProvider>
+          <Routes />
+        </RedwoodApolloProvider>
+      </AuthProvider>
+    </RedwoodProvider>
   </FatalErrorBoundary>
 )
 
@@ -219,7 +229,7 @@ export default App
 exports[`Should add config lines to App.{js,tsx} Matches magicLink Snapshot 1`] = `
 "import { AuthProvider } from '@redwoodjs/auth'
 import { Magic } from 'magic-sdk'
-import { FatalErrorBoundary } from '@redwoodjs/web'
+import { FatalErrorBoundary, RedwoodProvider } from '@redwoodjs/web'
 import { RedwoodApolloProvider } from '@redwoodjs/web/apollo'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
@@ -231,11 +241,13 @@ const m = new Magic(process.env.MAGICLINK_PUBLIC)
 
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
-    <AuthProvider client={m} type=\\"magicLink\\">
-      <RedwoodApolloProvider>
-        <Routes />
-      </RedwoodApolloProvider>
-    </AuthProvider>
+    <RedwoodProvider>
+      <AuthProvider client={m} type=\\"magicLink\\">
+        <RedwoodApolloProvider>
+          <Routes />
+        </RedwoodApolloProvider>
+      </AuthProvider>
+    </RedwoodProvider>
   </FatalErrorBoundary>
 )
 
@@ -247,7 +259,7 @@ exports[`Should add config lines to App.{js,tsx} Matches netlify Snapshot 1`] = 
 "import { AuthProvider } from '@redwoodjs/auth'
 import netlifyIdentity from 'netlify-identity-widget'
 import { isBrowser } from '@redwoodjs/prerender/browserUtils'
-import { FatalErrorBoundary } from '@redwoodjs/web'
+import { FatalErrorBoundary, RedwoodProvider } from '@redwoodjs/web'
 import { RedwoodApolloProvider } from '@redwoodjs/web/apollo'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
@@ -259,11 +271,13 @@ isBrowser && netlifyIdentity.init()
 
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
-    <AuthProvider client={netlifyIdentity} type=\\"netlify\\">
-      <RedwoodApolloProvider>
-        <Routes />
-      </RedwoodApolloProvider>
-    </AuthProvider>
+    <RedwoodProvider>
+      <AuthProvider client={netlifyIdentity} type=\\"netlify\\">
+        <RedwoodApolloProvider>
+          <Routes />
+        </RedwoodApolloProvider>
+      </AuthProvider>
+    </RedwoodProvider>
   </FatalErrorBoundary>
 )
 
@@ -274,7 +288,7 @@ export default App
 exports[`Should add config lines to App.{js,tsx} Matches nhost Snapshot 1`] = `
 "import { AuthProvider } from '@redwoodjs/auth'
 import { createClient } from 'nhost-js-sdk'
-import { FatalErrorBoundary } from '@redwoodjs/web'
+import { FatalErrorBoundary, RedwoodProvider } from '@redwoodjs/web'
 import { RedwoodApolloProvider } from '@redwoodjs/web/apollo'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
@@ -290,11 +304,13 @@ const nhostClient = createClient({
 
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
-    <AuthProvider client={nhostClient} type=\\"nhost\\">
-      <RedwoodApolloProvider>
-        <Routes />
-      </RedwoodApolloProvider>
-    </AuthProvider>
+    <RedwoodProvider>
+      <AuthProvider client={nhostClient} type=\\"nhost\\">
+        <RedwoodApolloProvider>
+          <Routes />
+        </RedwoodApolloProvider>
+      </AuthProvider>
+    </RedwoodProvider>
   </FatalErrorBoundary>
 )
 
@@ -305,7 +321,7 @@ export default App
 exports[`Should add config lines to App.{js,tsx} Matches supabase Snapshot 1`] = `
 "import { AuthProvider } from '@redwoodjs/auth'
 import { createClient } from '@supabase/supabase-js'
-import { FatalErrorBoundary } from '@redwoodjs/web'
+import { FatalErrorBoundary, RedwoodProvider } from '@redwoodjs/web'
 import { RedwoodApolloProvider } from '@redwoodjs/web/apollo'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
@@ -320,11 +336,13 @@ const supabaseClient = createClient(
 
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
-    <AuthProvider client={supabaseClient} type=\\"supabase\\">
-      <RedwoodApolloProvider>
-        <Routes />
-      </RedwoodApolloProvider>
-    </AuthProvider>
+    <RedwoodProvider>
+      <AuthProvider client={supabaseClient} type=\\"supabase\\">
+        <RedwoodApolloProvider>
+          <Routes />
+        </RedwoodApolloProvider>
+      </AuthProvider>
+    </RedwoodProvider>
   </FatalErrorBoundary>
 )
 

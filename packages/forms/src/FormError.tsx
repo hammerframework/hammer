@@ -56,7 +56,7 @@ const FormError = ({
     !!error.networkError && Object.keys(error.networkError).length > 0
 
   if (hasGraphQLError) {
-    const errors = error.graphQLErrors[0].extensions?.exception.messages
+    const errors = error.graphQLErrors[0].extensions?.exception?.messages
     rootMessage = error.graphQLErrors[0].message ?? 'Something went wrong.'
     for (const e in errors) {
       errors[e].forEach((fieldError: any) => {

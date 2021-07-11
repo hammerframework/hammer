@@ -270,6 +270,19 @@ describe('in javascript (default) mode', () => {
     ).toMatchSnapshot()
   })
 
+  test('error when no editable fields are in model', async () => {
+    await expect(
+      scaffold.files({
+        ...getDefaultArgs(defaults),
+        model: 'NoEditableField',
+        tests: true,
+        nestScaffoldByModel: true,
+      })
+    ).rejects.toThrow(
+      'There are no editable fields in the NoEditableField model'
+    )
+  })
+
   // Routes
 
   test('creates a single-word name routes', async () => {

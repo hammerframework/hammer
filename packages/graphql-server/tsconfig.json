@@ -12,6 +12,7 @@
   "include": ["src/**/*", "src/../package.json"],
   "references": [
     { "path": "../auth" },
+    { "path": "../api" },
     { "path": "../dev-server" }
   ]
 }

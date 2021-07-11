@@ -37,7 +37,7 @@ interface RouteProps {
   page: PageType
   name: string
   prerender?: boolean
-  whileLoading?: () => React.ReactElement | null
+  whileLoadingPage?: () => React.ReactElement | null
 }
 
 interface RedirectRouteProps {
@@ -51,7 +51,7 @@ interface NotFoundRouteProps {
   prerender?: boolean
 }
 
-type InternalRouteProps = Partial<
+export type InternalRouteProps = Partial<
   RouteProps & RedirectRouteProps & NotFoundRouteProps
 >
 
@@ -68,8 +68,7 @@ const InternalRoute: React.VFC<InternalRouteProps> = ({
   name,
   redirect,
   notfound,
-  // @ts-expect-error - This prop is picked up by <Set>
-  whileLoading, // eslint-disable-line
+  whileLoadingPage,
 }) => {
   const location = useLocation()
   const routerState = useRouterState()
@@ -115,6 +114,7 @@ const InternalRoute: React.VFC<InternalRouteProps> = ({
       spec={normalizePage(page)}
       delay={routerState.pageLoadingDelay}
       params={allParams}
+      whileLoadingPage={whileLoadingPage}
     />
   )
 }
@@ -132,7 +132,25 @@ const Router: React.FC<RouterProps> = ({
   paramTypes,
   pageLoadingDelay,
   children,
+}) => (
+  <LocationProvider>
+    <LocationAwareRouter
+      useAuth={useAuth}
+      paramTypes={paramTypes}
+      pageLoadingDelay={pageLoadingDelay}
+    >
+      {children}
+    </LocationAwareRouter>
+  </LocationProvider>
+)
+
+const LocationAwareRouter: React.FC<RouterProps> = ({
+  useAuth,
+  paramTypes,
+  pageLoadingDelay,
+  children,
 }) => {
+  const { pathname } = useLocation()
   const flatChildArray = flattenAll(children)
   const shouldShowSplash =
     flatChildArray.length === 1 &&
@@ -158,22 +176,55 @@ const Router: React.FC<RouterProps> = ({
     }
   })
 
+  let activeRoute = undefined
+  let NotFoundPage: PageType | undefined = undefined
+
+  const activeChildren = activeRouteTree(children, (child) => {
+    if (child.props.path) {
+      const { match } = matchPath(child.props.path, pathname, paramTypes)
+
+      if (match) {
+        activeRoute = child
+
+        // No need to loop further. As soon as we have a matching route we have
+        // all the info we need
+        return true
+      }
+    }
+
+    if (child.props.notfound && child.props.page) {
+      NotFoundPage = child.props.page
+    }
+
+    return false
+  })
+
   return (
     <RouterContextProvider
       useAuth={useAuth}
       paramTypes={paramTypes}
       pageLoadingDelay={pageLoadingDelay}
     >
-      <LocationProvider>
-        <ParamsProvider>
-          <RouteScanner>{children}</RouteScanner>
-        </ParamsProvider>
-      </LocationProvider>
+      {/* TS doesn't "see" the assignment to `activeRoute` inside the callback
+          above. So it's type is `never`. And you can't access attributes
+          (props in this case) on `never`. There is an open issue about not
+          seeing the assignment */}
+      {/* @ts-expect-error - https://github.com/microsoft/TypeScript/issues/11498 */}
+      <ParamsProvider path={activeRoute?.props?.path}>
+        {!activeRoute && NotFoundPage ? (
+          <PageLoader
+            spec={normalizePage(NotFoundPage)}
+            delay={pageLoadingDelay}
+          />
+        ) : (
+          activeRoute && activeChildren
+        )}
+      </ParamsProvider>
     </RouterContextProvider>
   )
 }
 
-/**
+/*
  * Find the active (i.e. first matching) route and discard any other routes.
  * Also, keep any <Set>s wrapping the active route.
  */
@@ -220,51 +271,6 @@ function activeRouteTree(
     },
     []
   )
-}
-
-const RouteScanner: React.FC = ({ children }) => {
-  const location = useLocation()
-  const routerState = useRouterState()
-
-  let foundMatchingRoute = false
-  let NotFoundPage: PageType | undefined = undefined
-
-  const filteredChildren = activeRouteTree(children, (child) => {
-    const { path } = child.props
-
-    if (path) {
-      const { match } = matchPath(
-        path,
-        location.pathname,
-        routerState.paramTypes
-      )
-
-      if (match) {
-        foundMatchingRoute = true
-
-        // No need to loop further. As soon as we have a matching route we have
-        // all the info we need
-        return true
-      }
-    }
-
-    if (child.props.notfound && child.props.page) {
-      NotFoundPage = child.props.page
-    }
-
-    return false
-  })
-
-  if (!foundMatchingRoute && NotFoundPage) {
-    return (
-      <PageLoader
-        spec={normalizePage(NotFoundPage)}
-        delay={routerState.pageLoadingDelay}
-      />
-    )
-  }
-
-  return <>{filteredChildren}</>
 }
 
 function isSpec(specOrPage: Spec | React.ComponentType): specOrPage is Spec {

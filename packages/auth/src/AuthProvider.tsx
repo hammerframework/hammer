@@ -58,11 +58,17 @@ export const AuthContext = React.createContext<AuthContextInterface>({
   currentUser: null,
 })
 
-type AuthProviderProps = {
-  client: SupportedAuthClients
-  type: SupportedAuthTypes
-  skipFetchCurrentUser?: boolean
-}
+type AuthProviderProps =
+  | {
+      client: SupportedAuthClients
+      type: Omit<SupportedAuthTypes, 'dbAuth'>
+      skipFetchCurrentUser?: boolean
+    }
+  | {
+      client?: never
+      type: 'dbAuth'
+      skipFetchCurrentUser?: boolean
+    }
 
 type AuthProviderState = {
   loading: boolean
@@ -102,7 +108,10 @@ export class AuthProvider extends React.Component<
 
   constructor(props: AuthProviderProps) {
     super(props)
-    this.rwClient = createAuthClient(props.client, props.type)
+    this.rwClient = createAuthClient(
+      props.client || (() => null),
+      props.type as SupportedAuthTypes
+    )
   }
 
   async componentDidMount() {
@@ -250,7 +259,7 @@ export class AuthProvider extends React.Component<
           hasRole: this.hasRole,
           reauthenticate: this.reauthenticate,
           client,
-          type,
+          type: type as SupportedAuthTypes,
         }}
       >
         {children}

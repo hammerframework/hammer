@@ -1,3 +1,6 @@
+import type { Find${singularPascalName}ById } from 'types/graphql'
+import type { CellSuccessProps, CellFailureProps } from '@redwoodjs/web'
+
 import ${singularPascalName} from '${importComponentName}'
 
 export const QUERY = gql`
@@ -12,6 +15,10 @@ export const Loading = () => <div>Loading...</div>
 
 export const Empty = () => <div>${singularPascalName} not found</div>
 
-export const Success = ({ ${singularCamelName} }) => {
+export const Failure = ({ error }: CellFailureProps) => (
+  <div style={{ color: 'red' }}>Error: {error.message}</div>
+)
+
+export const Success = ({ ${singularCamelName} }: CellSuccessProps<Find${singularPascalName}ById>) => {
   return <${singularPascalName} ${singularCamelName}={${singularCamelName}} />
 }

@@ -9,9 +9,8 @@ import terminalLink from 'terminal-link'
 
 import { ensurePosixPath, getConfig } from '@redwoodjs/internal'
 
-import { generateTemplate, getPaths, writeFilesTask } from 'src/lib'
-import c from 'src/lib/colors'
-
+import { generateTemplate, getPaths, writeFilesTask } from '../../lib'
+import c from '../../lib/colors'
 import { yargsDefaults } from '../generate'
 
 /**

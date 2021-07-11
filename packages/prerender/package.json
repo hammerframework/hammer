@@ -21,6 +21,7 @@
     "@redwoodjs/structure": "0.34.1",
     "@redwoodjs/web": "0.34.1",
     "babel-plugin-ignore-html-and-css-imports": "0.1.0",
+    "cheerio": "1.0.0-rc.10",
     "node-fetch": "2.6.1"
   },
   "scripts": {

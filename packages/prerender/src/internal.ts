@@ -28,6 +28,8 @@ export const registerShims = () => {
 
   global.__REDWOOD__PRERENDERING = true
 
+  global.__REDWOOD__HELMET_CONTEXT = {}
+
   // Let routes auto loader plugin know
   process.env.__REDWOOD__PRERENDERING = '1'
 
