@@ -34,6 +34,7 @@
 
     "postinstall": "yarn framework install",
     "build:link": "./tasks/build-and-copy",
-    "build:test-project": "./tasks/test-project/test-project"
+    "build:test-project": "./tasks/test-project/test-project",
+    "build:release-notes": "cd tasks/release-notes && yarn install && ./release-notes.js"
   }
 }
