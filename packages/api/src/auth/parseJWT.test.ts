@@ -1,4 +1,4 @@
-import { parseJWT } from '../parseJWT'
+import { parseJWT } from './parseJWT'
 
 const JWT_CLAIMS = {
   iss: 'https://app.us.auth0.com/',
@@ -40,22 +40,22 @@ const JWT_WITH_ROLES_CLAIM = {
 
 describe('parseJWT', () => {
   describe('handle empty token cases', () => {
-    test('it handles null token and returns empty appMetdata and roles', () => {
+    test('it handles null token and returns empty appMetadata and roles', () => {
       const token = { decoded: null, namespace: null }
       expect(parseJWT(token)).toEqual({ appMetadata: {}, roles: [] })
     })
 
-    test('it handles an undefined token and returns empty appMetdata and roles', () => {
+    test('it handles an undefined token and returns empty appMetadata and roles', () => {
       const token = { decoded: undefined, namespace: undefined }
       expect(parseJWT(token)).toEqual({ appMetadata: {}, roles: [] })
     })
 
-    test('it handles an undefined decoded token and returns empty appMetdata and roles', () => {
+    test('it handles an undefined decoded token and returns empty appMetadata and roles', () => {
       const token = { decoded: undefined, namespace: null }
       expect(parseJWT(token)).toEqual({ appMetadata: {}, roles: [] })
     })
 
-    test('it handles an undefined namespace in token and returns empty appMetdata and roles', () => {
+    test('it handles an undefined namespace in token and returns empty appMetadata and roles', () => {
       const token = { decoded: null, namespace: undefined }
       expect(parseJWT(token)).toEqual({ appMetadata: {}, roles: [] })
     })

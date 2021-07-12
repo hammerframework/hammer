@@ -9,6 +9,15 @@ export const getCurrentUser = async (decoded) => {
   return db.user.findUnique({ where: { address: decoded.address } })
 }
 
+/**
+ * The user is authenticated if there is a currentUser in the context
+ *
+ * @returns {boolean} - If the currentUser is authenticated
+ */
+export const isAuthenticated = () => {
+  return !!context.currentUser
+}
+
 // Use this function in your services to check that a user is logged in, and
 // optionally raise an error if they're not.
 

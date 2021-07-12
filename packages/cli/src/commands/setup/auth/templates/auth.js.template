@@ -1,4 +1,3 @@
-
 import { AuthenticationError, ForbiddenError, parseJWT } from '@redwoodjs/api'
 
 /**
@@ -13,8 +12,49 @@ import { AuthenticationError, ForbiddenError, parseJWT } from '@redwoodjs/api'
  *
  * @see https://github.com/redwoodjs/redwood/tree/main/packages/auth for examples
  */
-export const getCurrentUser = async (decoded, { _token, _type }, { _event, _context }) => {
+export const getCurrentUser = async (
+  decoded,
+  { _token, _type },
+  { _event, _context }
+) => {
   return { ...decoded, roles: parseJWT({ decoded }).roles }
+}
+
+/**
+ * The user is authenticated if there is a currentUser in the context
+ *
+ * @returns {boolean} - If the currentUser is authenticated
+ */
+export const isAuthenticated = () => {
+  return !!context.currentUser
+}
+
+/**
+ * Checks if the currentUser is authenticated (and assigned one of the given roles)
+ *
+ * @param {string= | string[]=} roles - A single role or list of roles to check if the user belongs to
+ *
+ * @returns {boolean} - Returns true if the currentUser is authenticated (and assigned one of the given roles)
+ */
+export const hasRole = ({ roles }) => {
+  if (!isAuthenticated()) {
+    return false
+  }
+
+  if(!!roles) {
+    if (Array.isArray(roles) {
+      return context.currentUser.roles?.some((r) => roles.includes(r))
+    }
+
+    if (typeof roles === 'string') {
+      return context.currentUser.roles?.includes(roles)
+      }
+
+    // roles not found
+    return false
+  }
+
+  return false
 }
 
 /**
@@ -22,33 +62,21 @@ export const getCurrentUser = async (decoded, { _token, _type }, { _event, _cont
  * whether or not they are assigned a role, and optionally raise an
  * error if they're not.
  *
- * @param {string=} roles - An optional role or list of roles
- * @param {string[]=} roles - An optional list of roles
- * @returns {boolean} - If the currentUser is authenticated (and assigned one of the given roles)
+ * @param {string= | string[]=} roles - A single role or list of roles to check if the user belongs to
+ *
+ * @returns - If the currentUser is authenticated (and assigned one of the given roles)
  *
  * @throws {AuthenticationError} - If the currentUser is not authenticated
  * @throws {ForbiddenError} If the currentUser is not allowed due to role permissions
  *
  * @see https://github.com/redwoodjs/redwood/tree/main/packages/auth for examples
  */
-export const requireAuth = ({ role } = {}) => {
-  if (!context.currentUser) {
+export const requireAuth = ({ roles } = {}) => {
+  if (!isAuthenticated) {
     throw new AuthenticationError("You don't have permission to do that.")
   }
 
-  if (
-    typeof role !== 'undefined' &&
-    typeof role === 'string' &&
-    !context.currentUser.roles?.includes(role)
-  ) {
-    throw new ForbiddenError("You don't have access to do that.")
-  }
-
-  if (
-    typeof role !== 'undefined' &&
-    Array.isArray(role) &&
-    !context.currentUser.roles?.some((r) => role.includes(r))
-  ) {
+  if (!hasRole({ roles })) {
     throw new ForbiddenError("You don't have access to do that.")
   }
 }

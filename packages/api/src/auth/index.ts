@@ -1,3 +1,5 @@
+export * from './parseJWT'
+
 import type { APIGatewayProxyEvent, Context as LambdaContext } from 'aws-lambda'
 
 import type { SupportedAuthTypes } from '@redwoodjs/auth'
