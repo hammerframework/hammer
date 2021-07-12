@@ -7,7 +7,8 @@
     "redwood": "./dist/index.js",
     "rw": "./dist/index.js",
     "redwood-tools": "./dist/redwood-tools.js",
-    "rwt": "./dist/redwood-tools.js"
+    "rwt": "./dist/redwood-tools.js",
+    "rwfw": "./dist/rwfw.js"
   },
   "files": [
     "dist"
@@ -20,6 +21,7 @@
     "@redwoodjs/prerender": "0.34.1",
     "@redwoodjs/structure": "0.34.1",
     "boxen": "5.0.1",
+    "configstore": "3.1.5",
     "camelcase": "6.0.0",
     "chalk": "4.1.1",
     "concurrently": "6.2.0",
@@ -56,7 +58,7 @@
     "prepublishOnly": "yarn build",
     "build:clean-dist": "rimraf 'dist/**/*/__tests__'",
     "build:js": "babel src -d dist --extensions \".js,.ts,.tsx\" --copy-files --no-copy-ignored && yarn build:clean-dist",
-    "fix:permissions": "chmod +x dist/index.js dist/redwood-tools.js",
+    "fix:permissions": "chmod +x dist/index.js dist/redwood-tools.js dist/rwfw.js",
     "build:watch": "nodemon --watch src --ext \"js,ts,tsx,template\" --ignore dist --exec \"yarn build && yarn fix:permissions\"",
     "test": "jest",
     "test:watch": "yarn test --watch"

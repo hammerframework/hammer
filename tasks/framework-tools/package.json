@@ -3,6 +3,7 @@
   "description": "",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "devDependencies": {
     "@redwoodjs/eslint-config": "0.34.1",
     "@babel/cli": "7.14.5",
@@ -26,15 +27,20 @@
     "core-js": "3.15.2",
     "cp-cli": "2.0.0",
     "cross-env": "7.0.3",
+    "fast-glob": "3.2.6",
     "jest": "26.5.3",
     "lerna": "4.0.0",
+    "npm-packlist": "2.2.2",
+    "rimraf": "3.0.2",
+    "ansi-colors": "4.1.1",
+    "terminal-link": "2.1.1",
     "msw": "0.30.1",
     "nodemon": "2.0.10",
     "ttypescript": "1.5.12",
     "typescript": "4.3.5",
     "typescript-transform-paths": "3.0.2",
     "whatwg-fetch": "3.6.2",
-    "rimraf": "3.0.2"
+    "ora": "5.4.1"
   },
   "scripts": {
     "build": "yarn build:js && yarn build:types",
@@ -45,6 +51,12 @@
     "test": "lerna run test --stream -- --colors --maxWorkers=4",
     "lint": "cross-env RWJS_CWD=../../packages/create-redwood-app/template eslint --config ../../.eslintrc.js ../../packages",
     "lint:fix": "yarn lint --fix",
-    "publish:canary": "lerna publish --force-publish --canary --include-merged-tags --preid canary --dist-tag canary --yes --loglevel verbose"
+    "publish:canary": "lerna publish --force-publish --canary --include-merged-tags --preid canary --dist-tag canary --yes --loglevel verbose",
+    "project:deps": "node ./src/frameworkDepsToProject.mjs",
+    "project:copy": "node ./src/frameworkFilesToProject.mjs",
+    "project:sync": "node ./src/frameworkSyncToProject.mjs"
+  },
+  "dependencies": {
+    "immer": "^9.0.5"
   }
 }

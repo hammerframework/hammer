@@ -22,7 +22,7 @@ const makeDirectory = () => {
   return REDWOOD_PROJECT_DIRECTORY
 }
 
-const buildRedwoodJSFramework = () => {
+const buildRedwoodFramework = () => {
   try {
     execa.sync('yarn build:clean && yarn build:js', {
       cwd: REDWOODJS_FRAMEWORK_PATH,
@@ -30,7 +30,7 @@ const buildRedwoodJSFramework = () => {
       stdio: 'inherit',
     })
   } catch (e) {
-    console.error('Could not build RedwoodJS framework')
+    console.error('Error: Could not build Redwood Framework')
     console.error(e)
     process.exit(1)
   }
@@ -48,52 +48,45 @@ const createRedwoodJSApp = () => {
       }
     )
   } catch (e) {
-    console.error('Could not create RedwoodJS project')
+    console.error('Error: Could not create Redwood Project')
     console.error(e)
     process.exit(1)
   }
 }
 
-const addRedwoodToWorkspaces = () => {
-  console.log(
-    'Adding "node_modules/_redwood-linked-packages/*" to package.json workspaces...'
-  )
-  const pkgJsonPath = path.join(REDWOOD_PROJECT_DIRECTORY, 'package.json')
-  const pkgJson = require(pkgJsonPath)
-  pkgJson.workspaces.packages = [
-    ...pkgJson.workspaces.packages,
-    'node_modules/_redwood-linked-packages/*',
-  ]
-  fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, undefined, 2))
+const addFrameworkDepsToProject = () => {
+  try {
+    execa.sync('yarn framework project:deps', {
+      cwd: REDWOODJS_FRAMEWORK_PATH,
+      shell: true,
+      stdio: 'inherit',
+      env: {
+        RWFW_PATH: REDWOODJS_FRAMEWORK_PATH,
+        RWJS_CWD: REDWOOD_PROJECT_DIRECTORY,
+      },
+    })
+  } catch (e) {
+    console.error(
+      'Error: Could not add Redwood Framework dependencies to project'
+    )
+    console.error(e)
+    process.exit(1)
+  }
 }
 
 const copyFrameworkPackages = () => {
   try {
-    const pkgDirectory = path.join(
-      REDWOOD_PROJECT_DIRECTORY,
-      'node_modules/_redwood-linked-packages'
-    )
-    fs.mkdirSync(pkgDirectory, { recursive: true })
-
-    console.log(
-      'cp -r',
-      `"${path.join(REDWOODJS_FRAMEWORK_PATH, 'packages/')}"`,
-      `"${pkgDirectory}"`
-    )
-    execa.sync(
-      'cp',
-      [
-        '-r',
-        `"${path.join(REDWOODJS_FRAMEWORK_PATH, 'packages/')}"`,
-        `"${pkgDirectory}"`,
-      ],
-      {
-        shell: true,
-        stdio: 'inherit',
-      }
-    )
+    execa.sync('yarn framework project:copy', {
+      cwd: REDWOODJS_FRAMEWORK_PATH,
+      shell: true,
+      stdio: 'inherit',
+      env: {
+        RWFW_PATH: REDWOODJS_FRAMEWORK_PATH,
+        RWJS_CWD: REDWOOD_PROJECT_DIRECTORY,
+      },
+    })
   } catch (e) {
-    console.error('We could not copy the RedwoodJS framework packages')
+    console.error('Error: We could not copy Redwood Framework packages')
     console.error(e)
     process.exit(1)
   }
@@ -107,7 +100,7 @@ const runYarnInstall = () => {
       stdio: 'inherit',
     })
   } catch (e) {
-    console.error('Could not run `yarn install`')
+    console.error('Error: Could not run `yarn install`')
     console.error(e)
     process.exit(1)
   }
@@ -135,6 +128,7 @@ const setRedwoodSecureServices = () => {
     stdio: 'inherit',
   })
 }
+
 const runDevServerInBackground = () => {
   console.log('Starting RedwoodJS dev server...')
   execa.sync('yarn rw dev --no-generate --fwd="--open=false" &', {
@@ -153,7 +147,6 @@ const runCypress = () => {
       cwd: path.join(REDWOODJS_FRAMEWORK_PATH, 'tasks/e2e'),
       shell: true,
       stdio: 'inherit',
-      env: process.env,
     }
   )
 }
@@ -164,7 +157,6 @@ const installTaskDeps = () => {
     cwd: path.join(REDWOODJS_FRAMEWORK_PATH, 'tasks/e2e'),
     shell: true,
     stdio: 'inherit',
-    env: process.env,
   })
 }
 
@@ -184,6 +176,7 @@ const initGit = () => {
 
 const args = yargs
   .option('create-project', { default: true, type: 'boolean', alias: 'create' })
+  .option('build-framework', { default: true, type: 'boolean', alias: 'build' })
   .option('copy-framework', { default: true, type: 'boolean', alias: 'copy' })
   .option('typescript', { default: false, type: 'boolean', alias: 'ts' })
   .option('auto-start', { default: true, type: 'boolean', alias: 'start' })
@@ -215,15 +208,21 @@ makeDirectory(REDWOOD_PROJECT_DIRECTORY)
 console.log()
 console.log('-'.repeat(80))
 
-let { copyFramework, createProject, typescript, autoStart, secureServices } =
-  args
+let {
+  buildFramework,
+  copyFramework,
+  createProject,
+  typescript,
+  autoStart,
+  secureServices,
+} = args
 
 const tasks = [
-  copyFramework && buildRedwoodJSFramework,
+  buildFramework && buildRedwoodFramework,
   createProject && createRedwoodJSApp,
-  copyFramework && addRedwoodToWorkspaces,
-  copyFramework && copyFrameworkPackages,
+  copyFramework && addFrameworkDepsToProject,
   copyFramework && runYarnInstall,
+  copyFramework && copyFrameworkPackages,
   !typescript && convertProjectToJavaScript,
   secureServices && setRedwoodSecureServices,
   autoStart && runDevServerInBackground,
@@ -238,3 +237,10 @@ for (const task of tasks) {
   console.log()
   console.log('-'.repeat(80))
 }
+
+process.on('SIGINT', () => {
+  console.log()
+  console.log(REDWOOD_PROJECT_DIRECTORY)
+  console.log('-'.repeat(80))
+  process.exit(0)
+})
