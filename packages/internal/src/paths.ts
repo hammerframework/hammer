@@ -48,6 +48,7 @@ export interface Paths {
       includes: string
       mirror: string
     }
+    pretranspile: string
   }
   web: BrowserTargetPaths
   api: NodeTargetPaths
@@ -154,6 +155,7 @@ export const getPaths = (BASE_DIR: string = getBaseDir()): Paths => {
         includes: path.join(BASE_DIR, '.redwood/types/includes'),
         mirror: path.join(BASE_DIR, '.redwood/types/mirror'),
       },
+      pretranspile: path.join(BASE_DIR, '.redwood/pretranspile'),
     },
 
     scripts: path.join(BASE_DIR, PATH_RW_SCRIPTS),
@@ -216,16 +218,29 @@ export const processPagesDir = (
 ): Array<PagesDependency> => {
   const pagePaths = fg.sync('**/*Page.{js,jsx,ts,tsx}', {
     cwd: webPagesDir,
+    absolute: true,
     ignore: ['node_modules'],
   })
+
+  const routesPath = getPaths().web.routes
+
   return pagePaths.map((pagePath) => {
     const p = path.parse(pagePath)
 
-    const importName = p.dir.replace(/\//g, '')
-    const importPath = importStatementPath(
-      path.join(webPagesDir, p.dir, p.name)
+    // the import path should be relative to the route.
+    let relativeImportPath = path.join(
+      path.relative(path.dirname(routesPath), path.dirname(pagePath)),
+      path.basename(p.name)
     )
 
+    const importName = path
+      .dirname(relativeImportPath.replace('pages/', ''))
+      .replace(/\//g, '')
+
+    if (relativeImportPath.indexOf('.') !== 0) {
+      relativeImportPath = './' + relativeImportPath
+    }
+    const importPath = importStatementPath(relativeImportPath)
     const importStatement = `const ${importName} = { name: '${importName}', loader: import('${importPath}') }`
     return {
       importName,
