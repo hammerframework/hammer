@@ -181,7 +181,6 @@ const mergeTypes = (
 export const makeMergedSchema = ({
   schemas,
   services,
-  schemaDirectives,
   schemaOptions,
 }: {
   schemas: {
@@ -191,8 +190,6 @@ export const makeMergedSchema = ({
     }
   }
   services: Services
-  /** @deprecated: Please use `schemaOptions` instead. */
-  schemaDirectives?: IExecutableSchemaDefinition['schemaDirectives']
   /**
    * A list of options passed to [makeExecutableSchema](https://www.graphql-tools.com/docs/generate-schema/#makeexecutableschemaoptions).
    */
@@ -205,7 +202,6 @@ export const makeMergedSchema = ({
 
   const schema = makeExecutableSchema({
     typeDefs,
-    schemaDirectives,
     ...schemaOptions,
   })
 

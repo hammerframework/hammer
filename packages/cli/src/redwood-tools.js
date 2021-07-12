@@ -20,7 +20,6 @@ const RW_BINS = {
   'redwood-tools': 'cli/dist/redwood-tools.js',
   rwt: 'cli/dist/redwood-tools.js',
   'dev-server': 'dev-server/dist/main.js',
-  'api-server': 'api-server/dist/index.js',
   'rw-api-server': 'api-server/dist/index.js',
   'rw-api-build': 'core/esbuild/index.js',
   'rw-gen': 'internal/dist/generate/generate.js',

@@ -3,7 +3,6 @@
   "description": "Redwood's HTTP server for Serverless Functions",
   "version": "0.34.1",
   "bin": {
-    "api-server": "./dist/index.js",
     "rw-api-server": "./dist/index.js",
     "rw-api-server-watch": "./dist/watch.js"
   },
