@@ -7,5 +7,9 @@
   },
   "[prisma]": {
     "editor.formatOnSave": true
+  },
+  "files.exclude": {
+    "**/node_modules": true,
+    ".redwood": true
   }
 }
