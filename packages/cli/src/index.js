@@ -5,7 +5,11 @@ import path from 'path'
 import { config } from 'dotenv-defaults'
 import yargs from 'yargs'
 
-import { getPaths, getConfigPath } from '@redwoodjs/internal'
+import {
+  getPaths,
+  getConfigPath,
+  telemetryMiddleware,
+} from '@redwoodjs/internal'
 
 /**
  * The current working directory can be set via:
@@ -62,7 +66,11 @@ const loadDotEnvDefaultsMiddleware = () => {
 // eslint-disable-next-line no-unused-expressions
 yargs
   .scriptName('rw')
-  .middleware([getCwdMiddleware, loadDotEnvDefaultsMiddleware])
+  .middleware([
+    getCwdMiddleware,
+    loadDotEnvDefaultsMiddleware,
+    telemetryMiddleware,
+  ])
   .option('cwd', {
     describe: 'Working directory to use (where `redwood.toml` is located.)',
   })

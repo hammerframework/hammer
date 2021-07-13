@@ -49,6 +49,10 @@ export interface Config {
     esbuild: boolean
     useEnvelop: boolean
   }
+  telemetry: {
+    url: string
+    apikey: string
+  }
 }
 
 // Note that web's includeEnvironmentVariables is handled in `webpack.common.js`
@@ -82,6 +86,11 @@ const DEFAULT_CONFIG: Config = {
   experimental: {
     esbuild: false,
     useEnvelop: false,
+  },
+  telemetry: {
+    url: 'https://cuvvzwmeexzpnctfycwn.supabase.co/rest/v1',
+    apikey:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYyNTg3NjYxMywiZXhwIjoxOTQxNDUyNjEzfQ.xDvtPNKfE1GLMIKO5kKJnk_NaQpCDvPpsHij6iz2UX8',
   },
 }
 
