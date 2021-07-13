@@ -1,8 +1,16 @@
 import { render, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
 
-import { Router, Route, routes, getFocus } from '../internal'
+import { HistoryProvider } from '@redwoodjs/history'
+
+import { Router as RedwoodRouter, Route, routes, getFocus } from '../internal'
 import RouteFocus from '../route-focus'
+
+const Router = ({ children }) => (
+  <HistoryProvider>
+    <RedwoodRouter>{children}</RedwoodRouter>
+  </HistoryProvider>
+)
 
 // SETUP
 const RouteFocusPage = () => (

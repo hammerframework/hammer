@@ -12,11 +12,11 @@ describe('MockRouter', () => {
   it('should correctly map routes', () => {
     render(
       <Router>
-        <Route name="a" path="/a" page={<FakePage />} />
-        <Route name="b" path="/b" page={<FakePage />} />
+        <Route name="a" path="/a" page={FakePage} />
+        <Route name="b" path="/b" page={FakePage} />
         <Private unauthenticated="a">
-          <Route name="c" path="/c" page={<FakePage />} />
-          <Route name="d" path="/d" page={<FakePage />} />
+          <Route name="c" path="/c" page={FakePage} />
+          <Route name="d" path="/d" page={FakePage} />
         </Private>
       </Router>
     )

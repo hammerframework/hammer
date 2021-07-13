@@ -3,8 +3,16 @@ import React from 'react'
 import { render, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
 
-import { Route, Router } from '../router'
+import { HistoryProvider } from '@redwoodjs/history'
+
+import { Route, Router as RedwoodRouter } from '../router'
 import { Set } from '../Set'
+
+const Router = ({ children }) => (
+  <HistoryProvider>
+    <RedwoodRouter>{children}</RedwoodRouter>
+  </HistoryProvider>
+)
 
 // SETUP
 const ChildA = () => <h1>ChildA</h1>

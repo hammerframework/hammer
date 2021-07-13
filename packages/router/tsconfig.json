@@ -6,11 +6,12 @@
     "rootDir": "src",
     "outDir": "dist",
     "paths": {
-      "src/*": ["./src/*"]
+      "src/*": ["./src/*"],
     }
   },
   "include": ["src", "./global.d.ts"],
   "references": [
     { "path": "../auth" },
+    { "path": "../history" },
   ]
 }

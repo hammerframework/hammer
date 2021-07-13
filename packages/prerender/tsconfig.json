@@ -2,11 +2,11 @@
   "extends": "../../tsconfig.compilerOption.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "rootDir": "src",
+    "rootDir": "./src",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
     "outDir": "dist",
     "paths": {
-      "src/*": ["./src/*"]
+      "src/*": ["./src/*"],
     },
     "allowJs": true
   },
@@ -14,6 +14,7 @@
   "references": [
     { "path": "../web" },
     { "path": "../router" },
+    { "path": "../history" },
     { "path": "../internal" },
     { "path": "../auth" },
     { "path": "../structure" }

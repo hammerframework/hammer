@@ -115,8 +115,8 @@ export class AuthProvider extends React.Component<
   }
 
   async componentDidMount() {
-    await this.rwClient.restoreAuthState?.()
-    return this.reauthenticate()
+    await this.reauthenticate()
+    return this.rwClient.restoreAuthState?.()
   }
 
   getCurrentUser = async (): Promise<Record<string, unknown>> => {

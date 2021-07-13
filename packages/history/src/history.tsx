@@ -19,10 +19,25 @@ const createHistory = () => {
         global?.location?.hash !== hash
       ) {
         global.history.pushState({}, '', to)
-      }
 
-      for (const listener of Object.values(listeners)) {
-        listener()
+        for (const listener of Object.values(listeners)) {
+          listener()
+        }
+      }
+    },
+    jump: (to: string, title = '') => {
+      const { pathname, search, hash } = new URL(global?.location?.origin + to)
+
+      if (
+        global?.location?.pathname !== pathname ||
+        global?.location?.search !== search ||
+        global?.location?.hash !== hash
+      ) {
+        global.history.replaceState({}, title, to)
+
+        for (const listener of Object.values(listeners)) {
+          listener()
+        }
       }
     },
     remove: (listenerId: string) => {

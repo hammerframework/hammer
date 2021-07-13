@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 
-import { createNamedContext, gHistory } from './internal'
+import { useHistory, gHistory } from '@redwoodjs/history'
+
+import { createNamedContext } from './internal'
 
 export interface LocationContextType {
   pathname: string
@@ -10,60 +12,59 @@ export interface LocationContextType {
 
 const LocationContext = createNamedContext<LocationContextType>('Location')
 
-interface LocationProviderProps {
-  location?: {
-    pathname: string
-    search?: string
-    hash?: string
-  }
+interface Props {
+  children: React.ReactNode
+  location?: LocationContextType
 }
 
-class LocationProvider extends React.Component<LocationProviderProps> {
-  // When prerendering, there might be more than one level of location providers. Use the values from the one above.
-  static contextType = LocationContext
-  HISTORY_LISTENER_ID: string | undefined = undefined
+const getContext = (
+  parentLocation: LocationContextType | undefined,
+  location: LocationContextType | undefined
+) => {
+  const windowLocation =
+    typeof window !== 'undefined'
+      ? window.location
+      : {
+          pathname: parentLocation?.pathname || '',
+          search: parentLocation?.search || '',
+          hash: parentLocation?.hash || '',
+        }
+  const { pathname, search, hash } = location || windowLocation
 
-  state = {
-    context: this.getContext(),
-  }
+  return { pathname, search, hash }
+}
 
-  getContext() {
-    const windowLocation =
-      typeof window !== 'undefined'
-        ? window.location
-        : {
-            pathname: this.context?.pathname || '',
-            search: this.context?.search || '',
-            hash: this.context?.hash || '',
-          }
-    const { pathname, search, hash } = this.props.location || windowLocation
+const LocationProvider: React.FC<Props> = ({ children, location }) => {
+  const HISTORY_LISTENER_ID = useRef<string | undefined>(undefined)
+  const parentLocation = useContext(LocationContext)
+  const [context, setContext] = useState(getContext(parentLocation, location))
+  const history = useHistory()
 
-    return { pathname, search, hash }
-  }
-
-  componentDidMount() {
-    this.HISTORY_LISTENER_ID = gHistory.listen(() => {
-      this.setState(() => ({ context: this.getContext() }))
+  useEffect(() => {
+    HISTORY_LISTENER_ID.current = gHistory.listen(() => {
+      setContext(getContext(parentLocation, location))
     })
-  }
 
-  componentWillUnmount() {
-    if (this.HISTORY_LISTENER_ID) {
-      gHistory.remove(this.HISTORY_LISTENER_ID)
+    history.addListener(() => {
+      setContext(getContext(parentLocation, location))
+    })
+
+    return () => {
+      if (HISTORY_LISTENER_ID.current) {
+        gHistory.remove(HISTORY_LISTENER_ID.current)
+      }
     }
-  }
+  }, [parentLocation, location, history])
 
-  render() {
-    return (
-      <LocationContext.Provider value={this.state.context}>
-        {this.props.children}
-      </LocationContext.Provider>
-    )
-  }
+  return (
+    <LocationContext.Provider value={context}>
+      {children}
+    </LocationContext.Provider>
+  )
 }
 
 const useLocation = () => {
-  const location = React.useContext(LocationContext)
+  const location = useContext(LocationContext)
 
   if (location === undefined) {
     throw new Error('useLocation must be used within a LocationProvider')
